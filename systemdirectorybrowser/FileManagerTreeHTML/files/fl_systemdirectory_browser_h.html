@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>fl_systemdirectory_browser_h.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #3366FF; font-weight: bold; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #4CCC4C; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+//  Fl_SystemDirectory_Browser.h      v 0.0.1                              2006-06-19 
+//
+//         for the Fast Light Tool Kit (FLTK) 1.1.x .
+//
+// Copyright 1998-2003 by Mariwan Jalal, Don Zimmer, Bill Spitzak   &amp; others.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Library General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Library General Public License for more details.
+//
+// You should have received a copy of the GNU Library General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+// USA.
+//
+// Please report all bugs and problems to &quot;fltk_kurdi@yahoo.com&quot;.
+//
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-preprocessor">#ifndef FL_SYSTEMDIRECTORY_BROWSER_H
+#define FL_SYSTEMDIRECTORY_BROWSER_H
+
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+
+#include &quot;fl_systemdirectory_icons.h&quot;
+#include &quot;Fl_Ext_Tree_Browser.h&quot; </span><span class="cpp1-comment">// inheriting class's header file
+</span><span class="cpp1-preprocessor">#include &quot;fl_ext_tree_item.h&quot;
+
+
+#include &lt;Fl/filename.H&gt;
+#include &lt;Fl/Fl_File_Icon.h&gt;
+#include &lt;Fl/x.h&gt;
+#include &lt;FL/fl_draw.H&gt;
+#include &quot;flstring.h&quot;
+
+</span><span class="cpp1-comment">// See if this required ... Start---+
+</span><span class="cpp1-preprocessor">#ifdef __CYGWIN__
+#  include &lt;mntent.h&gt;
+#elif defined(WIN32)
+#  include &lt;windows.h&gt;
+#  include &lt;direct.h&gt;
+</span><span class="cpp1-comment">// Apparently Borland C++ defines DIRECTORY in &lt;direct.h&gt;, which
+// interfers with the Fl_File_Icon enumeration of the same name.
+</span><span class="cpp1-preprocessor">#  ifdef DIRECTORY
+#    undef DIRECTORY
+#  endif </span><span class="cpp1-comment">// DIRECTORY
+</span><span class="cpp1-preprocessor">#endif </span><span class="cpp1-comment">// __CYGWIN__
+
+</span><span class="cpp1-preprocessor">#ifdef __EMX__
+#  define  INCL_DOS
+#  define  INCL_DOSMISC
+#  include &lt;os2.h&gt;
+#endif </span><span class="cpp1-comment">// __EMX__
+// See if this required ... END---+
+
+// System File Directory Widget .. by Mariwan Jalal
+</span><span class="cpp1-reservedword">class</span><span class="cpp1-space"> Fl_SystemDirectory_Browser : </span><span class="cpp1-reservedword">public</span><span class="cpp1-space"> Fl_Ext_TreeBrowser
+{
+	</span><span class="cpp1-reservedword">public</span><span class="cpp1-symbol">:
+		</span><span class="cpp1-comment">// class constructor
+</span><span class="cpp1-space">       Fl_SystemDirectory_Browser(</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">, </span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">, </span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">, </span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">, </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *);
+		</span><span class="cpp1-comment">// class destructor
+</span><span class="cpp1-space">      ~Fl_SystemDirectory_Browser();
+    </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> DriverLoad(</span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">*);	</span><span class="cpp1-comment">// I - Sort function to use
+</span><span class="cpp1-space">    Fl_Ext_TreeItem* DirectoryLoad( </span><span class="cpp1-reservedword">char</span><span class="cpp1-space">  *PathOrDriver, Fl_Ext_TreeItem * pItemBase);	</span><span class="cpp1-comment">// I - Sort function to use
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> UpdateDirList(Fl_Ext_TreeItem *StartItem)    ;
+    </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> CheckIfTheTreeHasThisItem(</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *pItemToCheck, Fl_Ext_TreeItem * pItemBaseToCheckedItem);   </span><span class="cpp1-comment">// check if you can find this item under the mentioned base item (return non zero if it find it)
+</span><span class="cpp1-space">    Fl_Ext_TreeItem * ItemToDirectoryUpdate( </span><span class="cpp1-reservedword">char</span><span class="cpp1-space">  *PathOrDriver, Fl_Ext_TreeItem * pItemBase);
+    </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">   (HandleSelect)( Fl_Ext_TreeItem* pData, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bState);  </span><span class="cpp1-comment">// A Callback function pointer left for the user : 
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">   (HandleInvoke)(Fl_Ext_TreeItem *ItemSquareClicked );              </span><span class="cpp1-comment">// A Callback function pointer left for the user :  double click 
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">   (HandleMenu)(</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *pData);                                      </span><span class="cpp1-comment">/// left for the user
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">*   GetItemToDirectory(Fl_Ext_TreeItem *pItem); </span><span class="cpp1-comment">// Converting the Item name to a directory path
+
+</span><span class="cpp1-symbol">};
+
+</span><span class="cpp1-preprocessor">#endif </span><span class="cpp1-comment">// FL_SYSTEMDIRECTORY_BROWSER_H
+
+</span></span>
+</code></pre>
+</body>
+</html>

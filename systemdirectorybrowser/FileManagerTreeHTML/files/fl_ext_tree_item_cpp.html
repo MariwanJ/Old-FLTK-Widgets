@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>fl_ext_tree_item_cpp.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #3366FF; font-weight: bold; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #4CCC4C; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+// Fl_Ext_TreeItem.cpp     v 0.0.1                              2006-06-19 
+//
+//         for the Fast Light Tool Kit (FLTK) 1.1.x .
+//
+// Copyright 1998-2003 by Mariwan Jalal, Don Zimmer, Bill Spitzak   &amp; others.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Library General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Library General Public License for more details.
+//
+// You should have received a copy of the GNU Library General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+// USA.
+//
+// Please report all bugs and problems to &quot;fltk_kurdi@yahoo.com&quot;.
+//
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+
+
+</span><span class="cpp1-preprocessor">#include &quot;fl_ext_tree_item.h&quot;
+
+#include &lt;string.h&gt;
+#include &lt;stdio.h&gt;
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeItem::HandleFree(</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> )
+{
+     
+</span><span class="cpp1-reservedword">return</span><span class="cpp1-symbol">;     
+     
+}
+
+
+
+</span><span class="cpp1-comment">// Set Item type (this affect the pixmap drawn)
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeItem::type(uchar typestype)
+{
+  type_= typestype;
+}
+</span><span class="cpp1-comment">// Return the type
+</span><span class="cpp1-identifier">uchar Fl_Ext_TreeItem::type()
+{
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> type_;
+}
+</span><span class="cpp1-comment">//Constructor of Item class
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem::Fl_Ext_TreeItem()
+{
+  m_nLevel = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;   </span><span class="cpp1-comment">// Level at the begining
+</span><span class="cpp1-space">  m_bVisible = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;  </span><span class="cpp1-comment">// Visible  0 not 1 visible
+</span><span class="cpp1-space">  m_bSelected = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;  </span><span class="cpp1-comment">// Selected or not 0 not 1 selected
+</span><span class="cpp1-space">  type_=FL_TREE_ITEM_FOLDER; </span><span class="cpp1-comment">// Use folder picture as standard
+
+</span><span class="cpp1-space">  m_pPrev = NULL;  </span><span class="cpp1-comment">// No previous
+</span><span class="cpp1-space">  m_pNext = NULL;  </span><span class="cpp1-comment">// No next
+</span><span class="cpp1-space">  m_pData = NULL;  </span><span class="cpp1-comment">// No data or name
+</span><span class="cpp1-space">  m_bGrey=  </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;  </span><span class="cpp1-comment">// Not Grey
+</span><span class="cpp1-space">  }
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeItem::GetGrey(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">)
+{
+ </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> m_bGrey;
+}
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeItem::SetGrey(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bSet)
+{
+</span><span class="cpp1-comment">//Avoid error
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">)
+{
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (bSet &lt;</span><span class="cpp1-number">0</span><span class="cpp1-symbol">) bSet =</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (bSet &gt;</span><span class="cpp1-number">1</span><span class="cpp1-symbol">) bSet =</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+      m_bGrey=bSet; </span><span class="cpp1-comment">//Set Grey
+</span><span class="cpp1-space">      cb_GetGrey();
+      </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+}
+
+     </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">//error
+</span><span class="cpp1-symbol">}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+//Item class Destructor
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem::~Fl_Ext_TreeItem()
+{
+</span><span class="cpp1-preprocessor">#ifdef DEBUG
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(cb_GetName &amp;&amp; m_pData) printf(</span><span class="cpp1-string">&quot;deleting tree item %s\n&quot;</span><span class="cpp1-symbol">, (*cb_GetName)(m_pData));
+</span><span class="cpp1-preprocessor">#endif
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;m_PixmapPicture==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">))  </span><span class="cpp1-comment">// make sure the pixmap has been deleted
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">delete</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;m_PixmapPicture;
+    HandleFree(); </span><span class="cpp1-comment">// do the callback 
+</span><span class="cpp1-symbol">}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+// the funnction is not implimented .. to be done in the future
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space">   Fl_Ext_TreeItem::cb_GetGrey()    </span><span class="cpp1-comment">// A Callback function pointer left for the user : 
+</span><span class="cpp1-symbol">{
+     </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;  
+}
+
+
+</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *Fl_Ext_TreeItem::GetName()
+{
+     </span><span class="cpp1-comment">// this return the item name 
+</span><span class="cpp1-space">     </span><span class="cpp1-comment">// the function could be re-writen it is vertual 
+</span><span class="cpp1-space">     </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">)
+       </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!((m_pData==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)||(strlen((</span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">*)(m_pData))==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)||(</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)))
+           </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> ((</span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">*)(m_pData)); 
+    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-string">&quot;&quot;</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// return nothing when error occure
+</span><span class="cpp1-symbol">}
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeItem::IsParent()
+{
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!(m_pNext)) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// no other item in the tree so get out with Zero result
+</span><span class="cpp1-space">  
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> (m_pNext-&gt;m_nLevel &gt; m_nLevel);  </span><span class="cpp1-comment">// return if the next item is a higher level (i.e child)
+</span><span class="cpp1-space">  
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeItem::IsOpen()
+{
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!IsParent()) 
+    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> m_pNext-&gt;m_bVisible; </span><span class="cpp1-comment">//  return if it is visible  - this is for the childs only
+</span><span class="cpp1-space">  }
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem *Fl_Ext_TreeItem::GetParent(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">) </span><span class="cpp1-comment">// Return the parent to the child if available
+</span><span class="cpp1-symbol">{
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!(m_nLevel)) 
+    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> NULL;  </span><span class="cpp1-comment">// error
+
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *pPrev = m_pPrev; </span><span class="cpp1-comment">// Get previous
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pPrev) </span><span class="cpp1-comment">// Search for the parrent
+</span><span class="cpp1-space">  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pPrev-&gt;m_nLevel &lt; m_nLevel)   </span><span class="cpp1-comment">// if the parrent found go out and return it
+</span><span class="cpp1-space">       </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pPrev-&gt;m_nLevel == </span><span class="cpp1-number">0</span><span class="cpp1-space"> )  </span><span class="cpp1-comment">//whe have reached the first item
+</span><span class="cpp1-space">    {
+      </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// the item dose not has any parent
+</span><span class="cpp1-space">      </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;   </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">      
+    }
+    
+    pPrev = pPrev-&gt;m_pPrev;  </span><span class="cpp1-comment">// Get previous item
+</span><span class="cpp1-space">  }
+  
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> pPrev; </span><span class="cpp1-comment">// Return the result (the parrent)
+</span><span class="cpp1-symbol">}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+// This determine the last child
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem *Fl_Ext_TreeItem::GetLastChild(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">)
+{
+  Fl_Ext_TreeItem *pNext = m_pNext;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!pNext) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> NULL;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pNext-&gt;m_nLevel != m_nLevel + </span><span class="cpp1-number">1</span><span class="cpp1-symbol">) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> NULL;
+
+  </span><span class="cpp1-comment">// find last in this branch
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *pTemp = NULL;
+
+  </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pNext)
+  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pNext-&gt;m_nLevel &lt;= m_nLevel) </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    pTemp = pNext;
+    pNext = pNext-&gt;m_pNext;
+  }
+
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> pTemp;
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+// is it the last?
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeItem::IsLastSibling()
+{
+  Fl_Ext_TreeItem *pNnext = m_pNext;
+  </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pNnext)
+  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pNnext-&gt;m_nLevel &lt;= m_nLevel) </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+
+    pNnext = pNnext-&gt;m_pNext;
+  }
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!pNnext) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+  
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> (pNnext-&gt;m_nLevel &lt; m_nLevel);
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+// is it the first?
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeItem::IsFirstSibling()
+{
+  Fl_Ext_TreeItem *pPrev = m_pPrev;
+  </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pPrev)
+  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pPrev-&gt;m_nLevel &lt;= m_nLevel) </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+
+    pPrev = pPrev-&gt;m_pPrev;
+  }
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!pPrev) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+  
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> (pPrev-&gt;m_nLevel &lt; m_nLevel);
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+// changed to stop at lower level when expanding
+// Show the branch 
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeItem::SetBranchVisible(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bVisible)
+{
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!IsParent()) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(m_pNext-&gt;m_bVisible == bVisible) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+  Fl_Ext_TreeItem *pNnext = m_pNext;
+    
+  </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pNnext)
+  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pNnext-&gt;m_nLevel &lt;= m_nLevel) </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!bVisible || (bVisible &amp;&amp; pNnext-&gt;m_nLevel == (m_nLevel+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">))) </span><span class="cpp1-comment">// only expand immediate children
+</span><span class="cpp1-space">    {
+      pNnext-&gt;m_bVisible = bVisible;
+    }
+
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!bVisible) </span><span class="cpp1-comment">// not visible so hide them.
+</span><span class="cpp1-space">       pNnext-&gt;m_bSelected = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// de-select all sub-items when hiding
+</span><span class="cpp1-space">    pNnext = pNnext-&gt;m_pNext;
+  }
+  
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+}
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+</span></span>
+</code></pre>
+</body>
+</html>

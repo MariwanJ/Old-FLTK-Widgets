@@ -1,0 +1,38 @@
+# Project: LCD
+# Makefile created by Dev-C++ 4.9.8.5
+
+CPP  = g++.exe
+CC   = gcc.exe
+WINDRES = windres.exe
+RES  = Project1_private.res
+OBJ  = Fl_LCDWidget48.o fl_lcd_clock.o main.o $(RES)
+LINKOBJ  = Fl_LCDWidget48.o fl_lcd_clock.o main.o $(RES)
+LIBS =  -L"C:/Dev-Cpp/lib" -mwindows -lfltk -lole32 -luuid -lcomctl32 -lwsock32 -lm 
+INCS =  -I"C:/Dev-Cpp/include"  -I"E:/tempfil/LCDFLTK/FLTKDIGITALCLOCK/Window/FLCD3-4Clock" 
+CXXINCS =  -I"C:/Dev-Cpp/include/c++/3.3.1"  -I"C:/Dev-Cpp/include/c++/3.3.1/mingw32"  -I"C:/Dev-Cpp/include/c++/3.3.1/backward"  -I"C:/Dev-Cpp/lib/gcc-lib/mingw32/3.3.1/include"  -I"C:/Dev-Cpp/include"  -I"E:/tempfil/LCDFLTK/FLTKDIGITALCLOCK/Window/FLCD3-4Clock" 
+BIN  = LCD4.exe
+CXXFLAGS = $(CXXINCS)-DWIN32  
+CFLAGS = $(INCS)-DWIN32  
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before LCD4.exe all-after
+
+
+clean: clean-custom
+	rm -f $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o "LCD4.exe" $(LIBS)
+
+Fl_LCDWidget48.o: Fl_LCDWidget48.cpp
+	$(CPP) -c Fl_LCDWidget48.cpp -o Fl_LCDWidget48.o $(CXXFLAGS)
+
+fl_lcd_clock.o: fl_lcd_clock.cpp
+	$(CPP) -c fl_lcd_clock.cpp -o fl_lcd_clock.o $(CXXFLAGS)
+
+main.o: main.cpp
+	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
+
+Project1_private.res: Project1_private.rc 
+	$(WINDRES) -i Project1_private.rc -I rc -o Project1_private.res -O coff 

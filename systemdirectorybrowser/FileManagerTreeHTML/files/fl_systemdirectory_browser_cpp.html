@@ -1,0 +1,750 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>fl_systemdirectory_browser_cpp.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #3366FF; font-weight: bold; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #4CCC4C; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+// Fl_SystemDirectory_Browser.cpp     v 0.0.1                              2006-06-19 
+//
+//         for the Fast Light Tool Kit (FLTK) 1.1.x .
+//
+// Copyright 1998-2003 by Mariwan Jalal, Don Zimmer, Bill Spitzak   &amp; others.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Library General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Library General Public License for more details.
+//
+// You should have received a copy of the GNU Library General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+// USA.
+//
+// Please report all bugs and problems to &quot;fltk_kurdi@yahoo.com&quot;.
+//
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+// This file is creating the Main widget which is the System Direcotry File Manager
+</span><span class="cpp1-preprocessor">#include &quot;fl_systemdirectory_browser.h&quot; 
+
+</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">using</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">namespace</span><span class="cpp1-space"> std;
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+</span><span class="cpp1-space"> </span><span class="cpp1-comment">// Callback when the item selected or + - used                      /
+//////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_SystemDirectory_Browser::HandleSelect(Fl_Ext_TreeItem *pItemClicked, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bState)       </span><span class="cpp1-comment">// Callback Select
+</span><span class="cpp1-symbol">{
+    { </span><span class="cpp1-comment">// START -- This part update the direcotries under the item .. it update one level under the shown itemes
+</span><span class="cpp1-space">    
+
+      Fl_Ext_TreeItem *pSubDirHideScan=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;  
+  {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (bState)
+      {   </span><span class="cpp1-comment">// one click open it or close it the tree
+</span><span class="cpp1-space">          fl_cursor(FL_CURSOR_WAIT, (Fl_Color)</span><span class="cpp1-number">0</span><span class="cpp1-symbol">, (Fl_Color)</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+          Fl::check(); </span><span class="cpp1-comment">// this added because in linux it dose not show the right curser until you call this
+</span><span class="cpp1-space">          {
+             Fl_Ext_TreeItem* scanDir=pItemClicked-&gt;m_pNext; </span><span class="cpp1-comment">//  ScanPointer 
+</span><span class="cpp1-space">             </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (scanDir!=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+             {
+             </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> ((scanDir-&gt;m_nLevel&gt;pItemClicked-&gt;m_nLevel) )
+             {
+                 </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((scanDir-&gt;m_nLevel&gt;pItemClicked-&gt;m_nLevel)&amp;&amp;(scanDir-&gt;m_nLevel&lt;pItemClicked-&gt;m_nLevel+</span><span class="cpp1-number">2</span><span class="cpp1-symbol">))
+                   {
+                       UpdateDirList(scanDir); </span><span class="cpp1-comment">// Update the subdirectories.
+</span><span class="cpp1-space">                       pSubDirHideScan=scanDir-&gt;m_pNext; 
+		       </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(pSubDirHideScan==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">))
+		       {
+                        </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">((scanDir-&gt;m_nLevel&lt;pSubDirHideScan-&gt;m_nLevel)) 
+                          {
+                                    pSubDirHideScan-&gt;m_bVisible=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;           
+                                    pSubDirHideScan=pSubDirHideScan-&gt;m_pNext;
+				    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">( pSubDirHideScan==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">) 
+				      </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+                          }
+                        }            
+                   }
+                     scanDir=scanDir-&gt;m_pNext;
+		     </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (scanDir==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+		       </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+                } 
+                
+               }
+           }
+      }   
+      ; </span><span class="cpp1-comment">//do nothing
+</span><span class="cpp1-space">     }
+     }</span><span class="cpp1-comment">// END -- This part update the direcotries under the item .. it update one level under the shown itemes
+
+
+// show normal curse again
+</span><span class="cpp1-space"> fl_cursor(FL_CURSOR_DEFAULT, (Fl_Color)</span><span class="cpp1-number">0</span><span class="cpp1-symbol">, (Fl_Color)</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+ 
+</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+}
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// Works  when double click occure on the item  -- left to the user  / 
+//////////////////////////////////////////////////////////////////////
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_SystemDirectory_Browser::HandleInvoke(Fl_Ext_TreeItem *ItemSquareClicked)        
+{
+    </span><span class="cpp1-comment">// just update the sub branch without selecting.
+
+</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// Works when right click occure  -- left to the user
+//////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_SystemDirectory_Browser::HandleMenu(</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *pData)         </span><span class="cpp1-comment">// Callback  Right click mouse clicked
+</span><span class="cpp1-symbol">{
+  
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">; 
+}
+
+ 
+</span><span class="cpp1-comment">// class constructor
+</span><span class="cpp1-identifier">Fl_SystemDirectory_Browser::Fl_SystemDirectory_Browser(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> x , </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> y, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> w, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> h, </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *l):
+                                                      Fl_Ext_TreeBrowser(x,y,w,h,l)
+{
+      box(FL_PLASTIC_DOWN_BOX);
+      has_scrollbar(</span><span class="cpp1-number">3</span><span class="cpp1-symbol">);
+      color(FL_BACKGROUND2_COLOR);
+      selection_color(FL_SELECTION_COLOR);
+      labeltype(FL_NORMAL_LABEL);
+      labelfont(</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+      labelsize(</span><span class="cpp1-number">12</span><span class="cpp1-symbol">);
+      labelcolor(FL_BLACK);
+      textsize(</span><span class="cpp1-number">12</span><span class="cpp1-symbol">);
+      align(FL_ALIGN_BOTTOM);                                                         
+                                                      
+Fl_Ext_TreeBrowser::type(FL_HOLD_BROWSER);
+
+DriverLoad(</span><span class="cpp1-string">&quot;&quot;</span><span class="cpp1-symbol">) ; </span><span class="cpp1-comment">// Load System Hardisk or cd rom or ..etc the items. not any further subDir
+
+// Here we should retrive the hole system directories.and sub. directories
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem *pRetriveDirecFirst= Fl_Ext_TreeBrowser::item_first(); </span><span class="cpp1-comment">// which is the desktop
+
+// Here we retrive SubDir under each drive so we can se the rectangel of the tree
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem *scanDir =pRetriveDirecFirst;
+             </span><span class="cpp1-comment">// The first drive;
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> (!(scanDir== </span><span class="cpp1-number">0</span><span class="cpp1-symbol">))
+	  {
+           scanDir= scanDir-&gt;m_pNext;
+           Fl_Ext_TreeItem *pSaveScanDir=scanDir;
+           </span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">* PathNameString= GetItemToDirectory(scanDir); </span><span class="cpp1-comment">//get the name of the item
+</span><span class="cpp1-space">	       
+	   </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((strlen (PathNameString))==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">) 
+	     </span><span class="cpp1-reservedword">continue</span><span class="cpp1-symbol">;
+       scanDir=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;DirectoryLoad (PathNameString, scanDir); </span><span class="cpp1-comment">// Try to load sub items
+</span><span class="cpp1-space">	   </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(strlen(PathNameString)==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">))
+              </span><span class="cpp1-reservedword">delete</span><span class="cpp1-space"> [] PathNameString;
+	   </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">	      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (PathNameString)
+	        </span><span class="cpp1-reservedword">delete</span><span class="cpp1-space"> PathNameString;
+       
+       
+       </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (scanDir==pSaveScanDir) 
+	           </span><span class="cpp1-reservedword">continue</span><span class="cpp1-symbol">;
+	    </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+	        </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (scanDir!=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+			 {
+			 ;
+			 }
+           </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+          {
+              scanDir=pSaveScanDir; 
+          }
+	 
+	  }
+    (item_first())-&gt;SetBranchVisible(</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+ }
+ 
+ 
+</span><span class="cpp1-comment">// class destructor
+</span><span class="cpp1-identifier">Fl_SystemDirectory_Browser::~Fl_SystemDirectory_Browser()
+{
+</span><span class="cpp1-comment">// put your code here
+</span><span class="cpp1-symbol">}
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space">						</span><span class="cpp1-comment">// O - Number of files loaded
+</span><span class="cpp1-identifier">Fl_SystemDirectory_Browser::DriverLoad(</span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space">  *directory)	</span><span class="cpp1-comment">// I - Directory to load 
+</span><span class="cpp1-symbol">{
+
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">		num_files;			</span><span class="cpp1-comment">// Number of files in directory
+//  int		num_dirs;			// Number of directories in list
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">char</span><span class="cpp1-space">		filename[</span><span class="cpp1-number">4096</span><span class="cpp1-symbol">];			</span><span class="cpp1-comment">// Current file
+
+</span><span class="cpp1-space">  Fl_Ext_TreeBrowser::clear();         </span><span class="cpp1-comment">/// this come from Fl_Group mariwan clear the list
+</span><span class="cpp1-space"> </span><span class="cpp1-comment">// directory_ = directory;               // if specified, the function will retrive the dir of the specified place
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *TempForTest=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;        </span><span class="cpp1-comment">// Temprorary pointer just for checking
+</span><span class="cpp1-preprocessor">#ifdef WIN32                 </span><span class="cpp1-comment">// level     name      icon         itembase
+</span><span class="cpp1-space">                           </span><span class="cpp1-comment">//nLevel, char *label, int x, Fl_Ext_TreeItem* pItemBase)
+</span><span class="cpp1-space">  TempForTest=  </span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item(</span><span class="cpp1-number">0</span><span class="cpp1-space">   ,</span><span class="cpp1-string">&quot;Desktop&quot;</span><span class="cpp1-space">    ,</span><span class="cpp1-number">1</span><span class="cpp1-space">         ,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);        </span><span class="cpp1-comment">// This should be always available.
+</span><span class="cpp1-preprocessor">#else 
+</span><span class="cpp1-space">  TempForTest=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item  (</span><span class="cpp1-number">0</span><span class="cpp1-symbol">,    </span><span class="cpp1-string">&quot;Desktop&quot;</span><span class="cpp1-symbol">,   </span><span class="cpp1-number">1</span><span class="cpp1-space">         ,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);        </span><span class="cpp1-comment">// This should be always available.
+</span><span class="cpp1-space">  TempForTest=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item  (</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,          </span><span class="cpp1-string">&quot;/&quot;</span><span class="cpp1-symbol">,  FL_TREE_ITEM_HARDDISK ,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);        </span><span class="cpp1-comment">// This should be always available.
+</span><span class="cpp1-preprocessor">#endif  
+
+
+
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// Retrive the Driver 
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// No directory specified; for UNIX list all mount points.  For DOS
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// list all valid drive letters...
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">//
+
+</span><span class="cpp1-space">    num_files = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+</span><span class="cpp1-preprocessor">#ifdef WIN32
+#  ifdef __CYGWIN__
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// Cygwin provides an implementation of setmntent() to get the list
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// of available drives...
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">    FILE          *m = setmntent(</span><span class="cpp1-string">&quot;/-not-used-&quot;</span><span class="cpp1-symbol">, </span><span class="cpp1-string">&quot;r&quot;</span><span class="cpp1-symbol">);
+    </span><span class="cpp1-reservedword">struct</span><span class="cpp1-space"> mntent *p;
+
+    </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> ((p = getmntent (m)) != NULL) 
+		{</span><span class="cpp1-comment">// this hould be fixed Mariwan
+</span><span class="cpp1-space">         </span><span class="cpp1-comment">//            level   item        icon                  item base-not nessisary here
+</span><span class="cpp1-space">     	 TempForTest=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item(</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,p-&gt;mnt_dir,FL_TREE_ITEM_HARDDISK ,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);    </span><span class="cpp1-comment">/// Add Item to the Browser
+</span><span class="cpp1-space">          num_files ++;            </span><span class="cpp1-comment">/// Increase nr of files
+</span><span class="cpp1-space">		}
+
+    endmntent(m);                </span><span class="cpp1-comment">// Close the mntent
+</span><span class="cpp1-preprocessor">#  else
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// Normal WIN32 code uses drive bits...
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">    DWORD	drives;		</span><span class="cpp1-comment">// Drive available bits
+
+</span><span class="cpp1-space">    drives = GetLogicalDrives();          </span><span class="cpp1-comment">/// Get Drivers
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> i = 'A'; i &lt;= 'Z'; i ++, drives &gt;&gt;= </span><span class="cpp1-number">1</span><span class="cpp1-symbol">)
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (drives &amp; </span><span class="cpp1-number">1</span><span class="cpp1-symbol">)
+      {
+        sprintf(filename, </span><span class="cpp1-string">&quot;%c:&quot;</span><span class="cpp1-symbol">, i);
+
+	  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (i &lt; 'C'){
+		  TempForTest=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item(</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,filename,FL_TREE_ITEM_FLOPPY,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);            </span><span class="cpp1-comment">/// Add Driver names 
+
+</span><span class="cpp1-space">	     }
+	  </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">	  {
+	    TempForTest=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item(</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,filename,FL_TREE_ITEM_HARDDISK,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);          </span><span class="cpp1-comment">/// Add files 
+</span><span class="cpp1-space">         num_files ++;
+        
+      }
+      
+      }
+
+</span><span class="cpp1-preprocessor">#  endif </span><span class="cpp1-comment">// __CYGWIN__
+</span><span class="cpp1-preprocessor">#elif defined(__EMX__)
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// OS/2 code uses drive bits...
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">    ULONG	curdrive;	</span><span class="cpp1-comment">// Current drive
+</span><span class="cpp1-space">    ULONG	drives;		</span><span class="cpp1-comment">// Drive available bits
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">		start = </span><span class="cpp1-number">3</span><span class="cpp1-symbol">;      </span><span class="cpp1-comment">// 'C' (MRS - dunno if this is correct!)
+
+
+</span><span class="cpp1-space">    DosQueryCurrentDisk(&amp;curdrive, &amp;drives);           </span><span class="cpp1-comment">// Retrive Drivers
+</span><span class="cpp1-space">    drives &gt;&gt;= start - </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (i = 'A'; i &lt;= 'Z'; i ++, drives &gt;&gt;= </span><span class="cpp1-number">1</span><span class="cpp1-symbol">)
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (drives &amp; </span><span class="cpp1-number">1</span><span class="cpp1-symbol">)
+      {            </span><span class="cpp1-comment">// Add to the browser
+</span><span class="cpp1-space">        sprintf(filename, </span><span class="cpp1-string">&quot;%c:/&quot;</span><span class="cpp1-symbol">, i);
+        </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (i&lt;'C' )
+          TempForTest=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item(</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,filename,Fl_Ext_TreeItem::FL_TREE_ITEM_FLOPPY,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+        </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+          TempForTest=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item(</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,filename,Fl_Ext_TreeItem::FL_TREE_ITEM_HARDDISK,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+ 	    num_files ++;
+ 	    
+      }
+</span><span class="cpp1-preprocessor">#elif defined(__APPLE__) &amp;&amp; !defined(__MWERKS__)
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// MacOS X and Darwin use getfsstat() system call...
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">			numfs;	</span><span class="cpp1-comment">// Number of file systems
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">struct</span><span class="cpp1-space"> statfs	*fs;	</span><span class="cpp1-comment">// Buffer for file system info
+
+
+</span><span class="cpp1-space">    numfs = getfsstat(NULL, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, MNT_NOWAIT);
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (numfs &gt; </span><span class="cpp1-number">0</span><span class="cpp1-symbol">) 
+    {
+      </span><span class="cpp1-comment">// We have file systems, get them...
+</span><span class="cpp1-space">      fs = </span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">struct</span><span class="cpp1-space"> statfs[numfs];
+      getfsstat(fs, </span><span class="cpp1-reservedword">sizeof</span><span class="cpp1-symbol">(</span><span class="cpp1-reservedword">struct</span><span class="cpp1-space"> statfs) * numfs, MNT_NOWAIT);
+
+      </span><span class="cpp1-comment">// Add filesystems to the list...
+</span><span class="cpp1-space">      </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (i = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">; i &lt; numfs; i ++) 
+      {
+        </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (fs[i].f_mntonname[</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]) 
+        {
+          snprintf(filename, </span><span class="cpp1-reservedword">sizeof</span><span class="cpp1-symbol">(filename), </span><span class="cpp1-string">&quot;%s/&quot;</span><span class="cpp1-symbol">, fs[i].f_mntonname);
+
+          TempForTest=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item(</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,filename,Fl_Ext_TreeItem::FL_TREE_ITEM_FLOPPY,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+        }
+         </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+           {
+             TempForTest=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item(</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;/&quot;</span><span class="cpp1-symbol">,Fl_Ext_TreeItem::FL_TREE_ITEM_HARDDISK,</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+            }
+         num_files ++;
+       }
+
+      </span><span class="cpp1-comment">// Free the memory used for the file system info array...
+</span><span class="cpp1-space">      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (fs)
+        </span><span class="cpp1-reservedword">delete</span><span class="cpp1-space"> [] fs;
+    }
+</span><span class="cpp1-preprocessor">#else
+
+
+</span><span class="cpp1-comment">//this is for linux  I decided to avoid retriving the fstab file .. since it need hard work in avoding multiplication of the item tree
+</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// so do nothing
+
+
+</span><span class="cpp1-preprocessor">#endif </span><span class="cpp1-comment">// WIN32 || __EMX__
+
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">/// The load recieved a directory .. End of driver section mariwan
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> (num_files);    </span><span class="cpp1-comment">// Return nomber of files loaded to the Browser  NOTE:this will not be real as we do not scan the whole hardisk
+</span><span class="cpp1-symbol">}
+
+
+
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////////////////
+// Retrive all subdirectories in the drive                                      /
+/////////////////////////////////////////////////////////////////////////////////
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem* Fl_SystemDirectory_Browser::DirectoryLoad( </span><span class="cpp1-reservedword">char</span><span class="cpp1-space">  *PathOrDriver, Fl_Ext_TreeItem * pItemBase)
+{
+
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (pItemBase==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">) 
+	{ 
+	</span><span class="cpp1-comment">// this is an error .. it should not happen that you send itembase zero!!
+</span><span class="cpp1-space">	</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+	}
+  dirent	**files;	</span><span class="cpp1-comment">// Files in in directory
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">		i;				</span><span class="cpp1-comment">// Looping var
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">		num_files;			</span><span class="cpp1-comment">// Number of files in directory
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">		num_dirs;			</span><span class="cpp1-comment">// Number of directories in list
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">char</span><span class="cpp1-space">		filename[</span><span class="cpp1-number">4096</span><span class="cpp1-symbol">];			</span><span class="cpp1-comment">// Current file
+
+</span><span class="cpp1-space">  Fl_File_Sort_F *sort=fl_alphasort; </span><span class="cpp1-comment">// jare mauiati .. mariwan
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *pItemRet=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// Build the file list...
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">//
+
+
+//   directory_=PathOrDriver;
+
+</span><span class="cpp1-space">	</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> SaveLevel= pItemBase-&gt;m_nLevel;
+
+</span><span class="cpp1-preprocessor">#if (defined(WIN32) &amp;&amp; !defined(__CYGWIN__)) || defined(__EMX__)
+
+</span><span class="cpp1-space">    strlcpy(filename, PathOrDriver, </span><span class="cpp1-reservedword">sizeof</span><span class="cpp1-symbol">(filename));
+    i = strlen(filename) - </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+    
+	
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (i == </span><span class="cpp1-number">2</span><span class="cpp1-space"> &amp;&amp; filename[</span><span class="cpp1-number">1</span><span class="cpp1-symbol">] == ':' &amp;&amp; (filename[</span><span class="cpp1-number">2</span><span class="cpp1-symbol">] == '/' || filename[</span><span class="cpp1-number">2</span><span class="cpp1-symbol">] == '\\'))
+		;
+         </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+           </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (filename[i] != '/' &amp;&amp; filename[i] != '\\')
+	   ;
+
+    num_files = fl_filename_list(filename, &amp;files, sort);
+
+</span><span class="cpp1-preprocessor">#else
+</span><span class="cpp1-space">    num_files = fl_filename_list(PathOrDriver, &amp;files, sort);
+</span><span class="cpp1-preprocessor">#endif </span><span class="cpp1-comment">/* WIN32 || __EMX__ */
+
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (num_files &lt;= </span><span class="cpp1-number">0</span><span class="cpp1-symbol">) </span><span class="cpp1-comment">/// what should I return
+</span><span class="cpp1-space">        </span><span class="cpp1-comment">//  Directory is Zero .. why? 
+</span><span class="cpp1-space">		   </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> pItemBase; </span><span class="cpp1-comment">// why??
+
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> i = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, num_dirs = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">; i &lt; num_files; i ++)
+	{   
+	   
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((strcmp(files[i]-&gt;d_name, </span><span class="cpp1-string">&quot;.&quot;</span><span class="cpp1-symbol">) &amp;&amp; strcmp(files[i]-&gt;d_name, </span><span class="cpp1-string">&quot;./&quot;</span><span class="cpp1-symbol">))) </span><span class="cpp1-comment">/// I will negelect this Mariwan
+</span><span class="cpp1-space">      {
+	      
+	      snprintf(filename, </span><span class="cpp1-reservedword">sizeof</span><span class="cpp1-symbol">(filename), </span><span class="cpp1-string">&quot;%s/%s&quot;</span><span class="cpp1-symbol">, PathOrDriver, files[i]-&gt;d_name);
+
+</span><span class="cpp1-preprocessor">#if defined(WIN32) &amp;&amp; !defined(__CYGWIN__)
+</span><span class="cpp1-space">	     </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (files[i]-&gt;d_name[strlen(files[i]-&gt;d_name) - </span><span class="cpp1-number">1</span><span class="cpp1-symbol">] == '/') </span><span class="cpp1-comment">// Take only directories
+</span><span class="cpp1-space"> 	      {
+						
+              files[i]-&gt;d_name[strlen(files[i]-&gt;d_name) - </span><span class="cpp1-number">1</span><span class="cpp1-symbol">] = '\0';   </span><span class="cpp1-comment">//OK testim kird
+</span><span class="cpp1-space">			  </span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">*TestForError=files[i]-&gt;d_name;
+
+			  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((strcmp(TestForError,</span><span class="cpp1-string">&quot;..&quot;</span><span class="cpp1-space"> )))
+				  {
+
+                                    pItemRet=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item(SaveLevel+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,files[i]-&gt;d_name,FL_TREE_ITEM_FOLDER,pItemBase);
+
+                                    num_dirs ++;
+                                    pItemBase=pItemRet;
+				  }
+           }
+</span><span class="cpp1-preprocessor">#else
+</span><span class="cpp1-space">	      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (fl_filename_isdir(filename))
+	       {
+	               </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> name[</span><span class="cpp1-number">1024</span><span class="cpp1-symbol">]; </span><span class="cpp1-comment">// Temporary directory name
+</span><span class="cpp1-space">         	        snprintf(name, </span><span class="cpp1-reservedword">sizeof</span><span class="cpp1-symbol">(name), </span><span class="cpp1-string">&quot;%s&quot;</span><span class="cpp1-symbol">, files[i]-&gt;d_name); 
+
+                   num_dirs ++;
+		   </span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">*TestForError=name;
+		    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((strcmp(TestForError,</span><span class="cpp1-string">&quot;..&quot;</span><span class="cpp1-space"> )))
+                       pItemRet=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item(SaveLevel+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,name,FL_TREE_ITEM_FOLDER,pItemBase);
+		       pItemBase=pItemRet;
+	        }
+</span><span class="cpp1-preprocessor">#endif </span><span class="cpp1-comment">// WIN32 &amp;&amp; !__CYGWIN__
+</span><span class="cpp1-space">        
+         }
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((files[i]))
+         free(files[i]);
+     }
+     </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (files)
+       free(files);
+
+</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> pItemRet;
+}
+
+
+
+
+</span><span class="cpp1-comment">// Function to return the path name from the drive name
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">* Fl_SystemDirectory_Browser::GetItemToDirectory(Fl_Ext_TreeItem *pCurrentItem) 
+{
+
+ </span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">* PathNameString=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;  
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(pCurrentItem==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)) 
+ { </span><span class="cpp1-comment">// if not the item is hardisk or root dir
+</span><span class="cpp1-space">   </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(pCurrentItem-&gt;m_nLevel&lt;</span><span class="cpp1-number">1</span><span class="cpp1-symbol">))
+    {
+     Fl_Ext_TreeItem* temp=pCurrentItem; </span><span class="cpp1-comment">// temprary pointer to search to the root
+</span><span class="cpp1-space">     </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> maxv=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+     </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> (!( temp-&gt;m_nLevel&lt;</span><span class="cpp1-number">1</span><span class="cpp1-symbol">))
+      {
+        maxv=maxv+</span><span class="cpp1-number">3</span><span class="cpp1-symbol">+(strlen(temp-&gt;GetName()));  </span><span class="cpp1-comment">// Calulate the Max size of the path string
+</span><span class="cpp1-space">          </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (temp-&gt;GetParent())                                                          </span><span class="cpp1-comment">// the one is for / between the directories
+</span><span class="cpp1-space">           {
+             </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((temp-&gt;GetParent())-&gt;m_nLevel!=</span><span class="cpp1-number">0</span><span class="cpp1-space"> ) </span><span class="cpp1-comment">// if m_nlevel &lt;&gt;0 then get the parent
+</span><span class="cpp1-space">               {
+                 temp=temp-&gt;GetParent();
+               }
+            </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">               </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+           }  
+         </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">            </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+     }
+   
+     </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(maxv==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">))
+     {
+        PathNameString= </span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> [maxv];
+
+        snprintf(PathNameString,</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;\0&quot;</span><span class="cpp1-symbol">);  </span><span class="cpp1-comment">//Reset the array .... avoiding error?!!
+</span><span class="cpp1-space">        temp=pCurrentItem;
+        </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> * Txtdes=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+        </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> (!(temp-&gt;m_nLevel&lt;</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)) </span><span class="cpp1-comment">//  search for the path 
+</span><span class="cpp1-space">        {
+          Txtdes=temp-&gt;GetName();
+
+          </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(strlen(PathNameString)&lt;=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">)) </span><span class="cpp1-comment">// if not the string is null or the char saved is \0
+</span><span class="cpp1-space">	       {
+            </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> * temp1=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> [strlen(PathNameString)+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">]; </span><span class="cpp1-comment">// allocate memeory for the temprary string pointer
+</span><span class="cpp1-space">            strcpy(temp1,PathNameString);  </span><span class="cpp1-comment">// copy the old value  (save it)
+</span><span class="cpp1-space">	        snprintf(PathNameString,strlen(PathNameString)+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;\0&quot;</span><span class="cpp1-symbol">);   </span><span class="cpp1-comment">// Reset the memory allocated 
+</span><span class="cpp1-space">	        strncat (PathNameString,Txtdes, strlen(Txtdes)+strlen(PathNameString));</span><span class="cpp1-comment">// Append the value to the Pointer PathNameString
+</span><span class="cpp1-preprocessor">#if (defined(WIN32) &amp;&amp; !defined(__CYGWIN__)) || defined(__EMX__)
+</span><span class="cpp1-space">	        strncat(PathNameString, </span><span class="cpp1-string">&quot;\\&quot;</span><span class="cpp1-symbol">, </span><span class="cpp1-number">1</span><span class="cpp1-symbol">); </span><span class="cpp1-comment">// Append the value to the Pointer PathNameString
+
+</span><span class="cpp1-preprocessor">#else
+</span><span class="cpp1-space">                
+		;
+		
+		</span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(temp-&gt;m_nLevel&lt;</span><span class="cpp1-number">2</span><span class="cpp1-symbol">))
+	          strncat(PathNameString, </span><span class="cpp1-string">&quot;/&quot;</span><span class="cpp1-symbol">, </span><span class="cpp1-number">1</span><span class="cpp1-symbol">); </span><span class="cpp1-comment">// Append the value to the Pointer PathNameString
+
+</span><span class="cpp1-preprocessor">#endif              
+</span><span class="cpp1-space">	          strncat(PathNameString, temp1, strlen(PathNameString)+strlen(temp1));  </span><span class="cpp1-comment">//Append the value to the pointer
+</span><span class="cpp1-space">                 </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(strlen(temp1)==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">))
+                     </span><span class="cpp1-reservedword">delete</span><span class="cpp1-space"> [] temp1;
+	                     
+             }
+         </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">             { </span><span class="cpp1-comment">// if it is just a root item
+</span><span class="cpp1-space">             strncat (PathNameString,Txtdes, strlen(Txtdes)+strlen(PathNameString));
+</span><span class="cpp1-preprocessor">#if (defined(WIN32) &amp;&amp; !defined(__CYGWIN__)) || defined(__EMX__)
+</span><span class="cpp1-space">			 
+	         strncat(PathNameString, </span><span class="cpp1-string">&quot;\\&quot;</span><span class="cpp1-symbol">, strlen(PathNameString)+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">); </span><span class="cpp1-comment">// Append the value to the Pointer PathNameString
+</span><span class="cpp1-space">			 
+</span><span class="cpp1-preprocessor">#else  
+</span><span class="cpp1-space">                   ;
+	         strncat(PathNameString, </span><span class="cpp1-string">&quot;/&quot;</span><span class="cpp1-symbol">, strlen(PathNameString)+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">); </span><span class="cpp1-comment">// Append the value to the Pointer PathNameString
+</span><span class="cpp1-preprocessor">#endif
+
+</span><span class="cpp1-space">            }   
+          </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (temp-&gt;GetParent())
+             temp=temp-&gt;GetParent();
+          </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+             </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// should not be nessisary but I write it to avoid a bug
+</span><span class="cpp1-space">         }
+
+   </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> PathNameString ;
+   
+    }
+    </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+    {
+    </span><span class="cpp1-comment">// max is Zero ... why?
+</span><span class="cpp1-space">     </span><span class="cpp1-reservedword">return</span><span class="cpp1-string">&quot;&quot;</span><span class="cpp1-symbol">;
+       
+    }
+   }
+   </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">   {</span><span class="cpp1-comment">// the pCurrentItem-&gt;m_nLevel &lt;1
+</span><span class="cpp1-space">       </span><span class="cpp1-comment">// this should not be happend but I will write my code avoiding bugs.
+</span><span class="cpp1-space">       </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> GetSizeofTheString=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+       GetSizeofTheString=strlen(pCurrentItem-&gt;GetName())+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+       PathNameString =</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> [GetSizeofTheString]; </span><span class="cpp1-comment">// get the lenght of the string and allocate memory
+</span><span class="cpp1-space">       strcpy(PathNameString,pCurrentItem-&gt;GetName());
+       </span><span class="cpp1-reservedword">return</span><span class="cpp1-space">  PathNameString;                   </span><span class="cpp1-comment">// return the result.
+</span><span class="cpp1-space">    }
+</span><span class="cpp1-comment">// in case it is the Base item liek &quot;/&quot; or &quot;c:&quot; ...etc
+
+</span><span class="cpp1-space"> }
+</span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+ {
+         </span><span class="cpp1-comment">// pCurrentItem was pointing to ziro  
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-string">&quot;&quot;</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// Here whe get an item which is zero so the return value is nothing     
+</span><span class="cpp1-space"> }
+  
+}
+
+
+</span><span class="cpp1-comment">/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////                Update one item 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_SystemDirectory_Browser::UpdateDirList(Fl_Ext_TreeItem *FromItem )
+{
+    
+  Fl_Ext_TreeItem * pCleanItem= FromItem;
+  pCleanItem=pCleanItem-&gt;m_pNext;
+  
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(pCleanItem==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">))
+   {
+     </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> ((pCleanItem-&gt;m_nLevel&gt;FromItem-&gt;m_nLevel) )
+      {
+
+        Remove(pCleanItem);
+        pCleanItem=FromItem-&gt;m_pNext;
+	
+	</span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((pCleanItem==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)) 
+	  </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+     }
+   
+  }
+ 
+
+  Fl_Ext_TreeItem *scanDir = FromItem;
+  </span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">* PathNameString= GetItemToDirectory(scanDir); </span><span class="cpp1-comment">//get the name of the item
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((strlen (PathNameString))==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">) 
+	    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">        scanDir=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;ItemToDirectoryUpdate(PathNameString, scanDir); </span><span class="cpp1-comment">// Try to load sub items
+
+</span><span class="cpp1-space">	   </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(strlen(PathNameString)==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">))
+              </span><span class="cpp1-reservedword">delete</span><span class="cpp1-space"> [] PathNameString;
+	   </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">	      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (PathNameString)
+	        </span><span class="cpp1-reservedword">delete</span><span class="cpp1-space"> PathNameString;
+       </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// ok
+</span><span class="cpp1-symbol">}
+
+
+
+</span><span class="cpp1-comment">//**********************************************************************************************
+//**********************************************************************************************
+//              Adding new directory connecting to the  base                                   *
+//**********************************************************************************************
+//**********************************************************************************************
+
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem* Fl_SystemDirectory_Browser::ItemToDirectoryUpdate( </span><span class="cpp1-reservedword">char</span><span class="cpp1-space">  *PathOrDriver, Fl_Ext_TreeItem * pItemBase)
+{
+
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (pItemBase==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">) 
+	{ 
+	</span><span class="cpp1-comment">// this is an error .. it should not happen that you send itembase zero!!
+</span><span class="cpp1-space">	</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+	}
+  dirent	**files;	</span><span class="cpp1-comment">// Files in in directory
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">		i;				</span><span class="cpp1-comment">// Looping var
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">		num_files;			</span><span class="cpp1-comment">// Number of files in directory
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">		num_dirs;			</span><span class="cpp1-comment">// Number of directories in list
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">char</span><span class="cpp1-space">		filename[</span><span class="cpp1-number">4096</span><span class="cpp1-symbol">];			</span><span class="cpp1-comment">// Current file
+
+</span><span class="cpp1-space">  Fl_File_Sort_F *sort=fl_alphasort; </span><span class="cpp1-comment">// jare mauiati .. mariwan
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *pItemRet=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// Build the file list...
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">//
+
+
+</span><span class="cpp1-space">	</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> SaveLevel= pItemBase-&gt;m_nLevel;
+
+</span><span class="cpp1-preprocessor">#if (defined(WIN32) &amp;&amp; !defined(__CYGWIN__)) || defined(__EMX__)
+
+</span><span class="cpp1-space">    strlcpy(filename, PathOrDriver, </span><span class="cpp1-reservedword">sizeof</span><span class="cpp1-symbol">(filename));
+    i = strlen(filename) - </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+    
+	
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (i == </span><span class="cpp1-number">2</span><span class="cpp1-space"> &amp;&amp; filename[</span><span class="cpp1-number">1</span><span class="cpp1-symbol">] == ':' &amp;&amp; (filename[</span><span class="cpp1-number">2</span><span class="cpp1-symbol">] == '/' || filename[</span><span class="cpp1-number">2</span><span class="cpp1-symbol">] == '\\'))
+		;
+         </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+           </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (filename[i] != '/' &amp;&amp; filename[i] != '\\')
+	   ;
+
+
+    num_files = fl_filename_list(filename, &amp;files, sort);
+    
+</span><span class="cpp1-preprocessor">#else
+</span><span class="cpp1-space">    num_files = fl_filename_list(PathOrDriver, &amp;files, sort);
+</span><span class="cpp1-preprocessor">#endif </span><span class="cpp1-comment">/* WIN32 || __EMX__ */
+
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (num_files &lt;= </span><span class="cpp1-number">0</span><span class="cpp1-symbol">) </span><span class="cpp1-comment">/// what should I return?
+</span><span class="cpp1-space">        </span><span class="cpp1-comment">// directory was zero?? .. I should neglect it!!!!?
+</span><span class="cpp1-space">		   </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> pItemBase; </span><span class="cpp1-comment">// why??
+</span><span class="cpp1-space">		
+
+    </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (i = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, num_dirs = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">; i &lt; num_files; i ++)
+	{   
+	   
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((strcmp(files[i]-&gt;d_name, </span><span class="cpp1-string">&quot;.&quot;</span><span class="cpp1-symbol">) &amp;&amp; strcmp(files[i]-&gt;d_name, </span><span class="cpp1-string">&quot;./&quot;</span><span class="cpp1-symbol">))) </span><span class="cpp1-comment">/// I will negelect this Mariwan
+</span><span class="cpp1-space">      {
+	        snprintf(filename, </span><span class="cpp1-reservedword">sizeof</span><span class="cpp1-symbol">(filename), </span><span class="cpp1-string">&quot;%s/%s&quot;</span><span class="cpp1-symbol">, PathOrDriver, files[i]-&gt;d_name);
+		      
+
+</span><span class="cpp1-preprocessor">#if defined(WIN32) &amp;&amp; !defined(__CYGWIN__)
+</span><span class="cpp1-space">	     </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (files[i]-&gt;d_name[strlen(files[i]-&gt;d_name) - </span><span class="cpp1-number">1</span><span class="cpp1-symbol">] == '/') </span><span class="cpp1-comment">// Take only directories
+</span><span class="cpp1-space"> 	      {
+						
+              files[i]-&gt;d_name[strlen(files[i]-&gt;d_name) - </span><span class="cpp1-number">1</span><span class="cpp1-symbol">] = '\0';   </span><span class="cpp1-comment">//OK 
+</span><span class="cpp1-space">			  </span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">*TestForError=files[i]-&gt;d_name;
+
+			  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((strcmp(TestForError,</span><span class="cpp1-string">&quot;..&quot;</span><span class="cpp1-space"> )))
+				  {
+				     
+				     </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!CheckIfTheTreeHasThisItem(files[i]-&gt;d_name,pItemBase))
+				     {
+
+                        pItemRet=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item(SaveLevel+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,files[i]-&gt;d_name,FL_TREE_ITEM_FOLDER,pItemBase);
+                        num_dirs ++;
+                        pItemBase=pItemRet;
+                     } 
+				  }
+           }
+</span><span class="cpp1-preprocessor">#else
+</span><span class="cpp1-space">	      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (fl_filename_isdir(filename))
+	       {
+		   
+			   
+	               </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> name[</span><span class="cpp1-number">1024</span><span class="cpp1-symbol">]; </span><span class="cpp1-comment">// Temporary directory name
+</span><span class="cpp1-space">         	       snprintf(name, </span><span class="cpp1-reservedword">sizeof</span><span class="cpp1-symbol">(name), </span><span class="cpp1-string">&quot;%s&quot;</span><span class="cpp1-symbol">, files[i]-&gt;d_name); 
+                   num_dirs ++;
+		   </span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">*TestForError=name;
+		    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((strcmp(TestForError,</span><span class="cpp1-string">&quot;..&quot;</span><span class="cpp1-space"> )))
+
+	             </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!CheckIfTheTreeHasThisItem(name,pItemBase))
+                       {
+		        pItemRet=</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;add_item(SaveLevel+</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,name,FL_TREE_ITEM_FOLDER,pItemBase);
+	               }
+		}
+</span><span class="cpp1-preprocessor">#endif </span><span class="cpp1-comment">// WIN32 &amp;&amp; !__CYGWIN__
+</span><span class="cpp1-space">        
+         }
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((files[i]))
+         free(files[i]);
+     }
+     </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (files)
+       free(files);
+
+</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> pItemRet;
+}
+
+</span><span class="cpp1-comment">// check if the item is available in the list
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_SystemDirectory_Browser::CheckIfTheTreeHasThisItem(</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *pItemToCheck, Fl_Ext_TreeItem * pItemBaseToCheckedItem)
+{
+    </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Result=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    Fl_Ext_TreeItem * pScanItem=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (pItemBaseToCheckedItem-&gt;m_nLevel&lt;=</span><span class="cpp1-number">2</span><span class="cpp1-symbol">)
+	  {
+               pScanItem=pItemBaseToCheckedItem;
+	  }
+    </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">	 {
+               </span><span class="cpp1-comment">// to get the first item inte subtree
+</span><span class="cpp1-space">            pScanItem=(pItemBaseToCheckedItem-&gt;GetParent())-&gt;m_pNext;  </span><span class="cpp1-comment">// take the first item in the subtree
+</span><span class="cpp1-space">	 }
+
+	 Fl_Ext_TreeItem *pRealBasePoint = pScanItem-&gt;m_pPrev;
+     </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pScanItem!=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+		 
+
+     </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> ((pScanItem-&gt;m_nLevel&gt; pItemBaseToCheckedItem-&gt;m_nLevel))
+		 { 
+           </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(strcmp(pScanItem-&gt;GetName(),pItemToCheck))
+
+			   {
+			   	 
+                  Result=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+                  </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;                                                   
+			   }
+          </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">			  {
+                  pScanItem=pScanItem-&gt;m_pNext;
+				  Result=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+			  }
+		 }
+     </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> Result;    
+	}
+</span></span>
+</code></pre>
+</body>
+</html>

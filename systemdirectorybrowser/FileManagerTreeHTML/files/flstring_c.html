@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>flstring_c.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #3366FF; font-weight: bold; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #4CCC4C; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-comment">/*
+ * &quot;$Id: flstring.c,v 1.1.2.3 2003/01/30 21:44:26 easysw Exp $&quot;
+ *
+ * BSD string functions for the Fast Light Tool Kit (FLTK).
+ *
+ * Copyright 1998-2003 by Bill Spitzak and others.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
+ *
+ * Please report all bugs and problems to &quot;fltk-bugs@fltk.org&quot;.
+ */
+
+</span><span class="cpp1-preprocessor">#include &quot;flstring.h&quot;
+
+#  if !HAVE_STRLCAT
+</span><span class="cpp1-comment">/*
+ * 'fl_strlcat()' - Safely concatenate two strings.
+ */
+
+</span><span class="cpp1-identifier">size_t				</span><span class="cpp1-comment">/* O - Length of string */
+</span><span class="cpp1-identifier">fl_strlcat(</span><span class="cpp1-reservedword">char</span><span class="cpp1-space">       *dst,	</span><span class="cpp1-comment">/* O - Destination string */
+</span><span class="cpp1-space">           </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *src,	</span><span class="cpp1-comment">/* I - Source string */
+</span><span class="cpp1-space">	   size_t     size) {	</span><span class="cpp1-comment">/* I - Size of destination string buffer */
+</span><span class="cpp1-space">  size_t	srclen;		</span><span class="cpp1-comment">/* Length of source string */
+</span><span class="cpp1-space">  size_t	dstlen;		</span><span class="cpp1-comment">/* Length of destination string */
+
+
+</span><span class="cpp1-space"> </span><span class="cpp1-comment">/*
+  * Figure out how much room is left...
+  */
+
+</span><span class="cpp1-space">  dstlen = strlen(dst);
+  size   -= dstlen + </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!size) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> (dstlen);	</span><span class="cpp1-comment">/* No room, return immediately... */
+
+</span><span class="cpp1-space"> </span><span class="cpp1-comment">/*
+  * Figure out how much room is needed...
+  */
+
+</span><span class="cpp1-space">  srclen = strlen(src);
+
+ </span><span class="cpp1-comment">/*
+  * Copy the appropriate amount...
+  */
+
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (srclen &gt; size) srclen = size;
+
+  memcpy(dst + dstlen, src, srclen);
+  dst[dstlen + srclen] = '\0';
+
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> (dstlen + srclen);
+}
+</span><span class="cpp1-preprocessor">#  endif </span><span class="cpp1-comment">/* !HAVE_STRLCAT */
+
+</span><span class="cpp1-preprocessor">#  if !HAVE_STRLCPY
+</span><span class="cpp1-comment">/*
+ * 'fl_strlcpy()' - Safely copy two strings.
+ */
+
+</span><span class="cpp1-identifier">size_t				</span><span class="cpp1-comment">/* O - Length of string */
+</span><span class="cpp1-identifier">fl_strlcpy(</span><span class="cpp1-reservedword">char</span><span class="cpp1-space">       *dst,	</span><span class="cpp1-comment">/* O - Destination string */
+</span><span class="cpp1-space">           </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *src,	</span><span class="cpp1-comment">/* I - Source string */
+</span><span class="cpp1-space">	   size_t      size) {	</span><span class="cpp1-comment">/* I - Size of destination string buffer */
+</span><span class="cpp1-space">  size_t	srclen;		</span><span class="cpp1-comment">/* Length of source string */
+
+
+</span><span class="cpp1-space"> </span><span class="cpp1-comment">/*
+  * Figure out how much room is needed...
+  */
+
+</span><span class="cpp1-space">  size --;
+
+  srclen = strlen(src);
+
+ </span><span class="cpp1-comment">/*
+  * Copy the appropriate amount...
+  */
+
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (srclen &gt; size) srclen = size;
+
+  memcpy(dst, src, srclen);
+  dst[srclen] = '\0';
+
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> (srclen);
+}
+</span><span class="cpp1-preprocessor">#  endif </span><span class="cpp1-comment">/* !HAVE_STRLCPY */
+
+
+/*
+ * End of &quot;$Id: flstring.c,v 1.1.2.3 2003/01/30 21:44:26 easysw Exp $&quot;.
+ */
+</span></span>
+</code></pre>
+</body>
+</html>

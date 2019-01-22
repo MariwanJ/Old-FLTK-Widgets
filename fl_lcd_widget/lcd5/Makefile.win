@@ -1,0 +1,35 @@
+# Project: Project1
+# Makefile created by Dev-C++ 4.9.8.5
+
+CPP  = g++.exe
+CC   = gcc.exe
+WINDRES = windres.exe
+RES  = lcd5_private.res
+OBJ  = Fl_LCDWidget5.o main.o $(RES)
+LINKOBJ  = Fl_LCDWidget5.o main.o $(RES)
+LIBS =  -L"C:/Dev-Cpp/lib" -mwindows -lfltk -lole32 -luuid -lcomctl32 -lwsock32 -lm
+INCS =  -I"C:/Dev-Cpp/include" 
+CXXINCS =  -I"C:/Dev-Cpp/include/c++/3.3.1"  -I"C:/Dev-Cpp/include/c++/3.3.1/mingw32"  -I"C:/Dev-Cpp/include/c++/3.3.1/backward"  -I"C:/Dev-Cpp/lib/gcc-lib/mingw32/3.3.1/include"  -I"C:/Dev-Cpp/include" 
+BIN  = lcd5.exe
+CXXFLAGS = $(CXXINCS) 
+CFLAGS = $(INCS)-DWIN32 -mms-bitfields 
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before lcd5.exe all-after
+
+
+clean: clean-custom
+	rm -f $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o "lcd5.exe" $(LIBS)
+
+Fl_LCDWidget5.o: Fl_LCDWidget5.cpp
+	$(CPP) -c Fl_LCDWidget5.cpp -o Fl_LCDWidget5.o $(CXXFLAGS)
+
+main.o: main.cpp
+	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
+
+lcd5_private.res: lcd5_private.rc 
+	$(WINDRES) -i lcd5_private.rc -I rc -o lcd5_private.res -O coff 

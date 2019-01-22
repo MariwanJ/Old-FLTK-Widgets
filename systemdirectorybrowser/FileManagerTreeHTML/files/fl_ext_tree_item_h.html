@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>fl_ext_tree_item_h.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #3366FF; font-weight: bold; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #4CCC4C; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+// Fl_Ext_TreeItem.h     v 0.0.1                              2006-06-19 
+//
+//         for the Fast Light Tool Kit (FLTK) 1.1.x .
+//
+// Copyright 1998-2003 by Mariwan Jalal, Don Zimmer, Bill Spitzak   &amp; others.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Library General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Library General Public License for more details.
+//
+// You should have received a copy of the GNU Library General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+// USA.
+//
+// Please report all bugs and problems to &quot;fltk_kurdi@yahoo.com&quot;.
+//
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-preprocessor">#ifndef FL_EXT_TREE_ITEM_H
+#define FL_EXT_TREE_ITEM_H
+#include &lt;Fl/Fl_Pixmap.h&gt;
+
+</span><span class="cpp1-comment">// defenition of Item type
+</span><span class="cpp1-preprocessor">#define       FL_TREE_ITEM_NOPICTURE              0
+#define       FL_TREE_ITEM_DESKTOP                1   
+#define       FL_TREE_ITEM_HOME                   2
+#define       FL_TREE_ITEM_FLOPPY                 3
+#define       FL_TREE_ITEM_HARDDISK               4
+#define       FL_TREE_ITEM_CDROM                  5
+#define       FL_TREE_ITEM_FOLDER                 6
+#define       FL_TREE_ITEM_FOLDERCLOSED           7
+#define       FL_TREE_ITEM_FOLDEROPEN             8
+#define       FL_TREE_ITEM_REMOTHARDDISK          9
+#define       FL_TREE_ITEM_NETWORK                10
+#define       FL_TREE_ITEM_CONTROLPANNEL          11
+#define       FL_TREE_ITEM_RECYCLEEMPTY           12
+#define       FL_TREE_ITEM_RECYCLEFULL            13
+</span><span class="cpp1-space">                               
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-reservedword">class</span><span class="cpp1-space"> Fl_Ext_TreeItem   </span><span class="cpp1-comment">// Item class which used by the tree browser
+</span><span class="cpp1-symbol">{
+</span><span class="cpp1-reservedword">friend</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">class</span><span class="cpp1-space"> Fl_Ext_TreeBrowser;
+</span><span class="cpp1-reservedword">public</span><span class="cpp1-symbol">:
+  Fl_Ext_TreeItem();
+  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> ~Fl_Ext_TreeItem();
+
+  </span><span class="cpp1-comment">// user setable callbacks etc.
+</span><span class="cpp1-space">  
+</span><span class="cpp1-comment">// Get Item name to the root . 
+</span><span class="cpp1-space">   </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *GetName(); </span><span class="cpp1-comment">// return a pointer to a string
+</span><span class="cpp1-space">   </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> SetGrey(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bSet); </span><span class="cpp1-comment">// set Grey.
+</span><span class="cpp1-space">   </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeItem::GetGrey(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">);
+   </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> cb_GetGrey();
+   </span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">* m_pData;    </span><span class="cpp1-comment">// Item name 
+
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> IsOpen(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">);    
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> IsParent(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">);
+
+  Fl_Ext_TreeItem *GetParent(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">);                      </span><span class="cpp1-comment">//  Get  Parent item
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *GetLastChild(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">);                   </span><span class="cpp1-comment">//  Get Last child in the tree
+
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> IsLastSibling();
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> IsFirstSibling();
+
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> SetBranchVisible(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bVisible);
+  uchar type_;
+  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> type( uchar );
+</span><span class="cpp1-reservedword">public</span><span class="cpp1-symbol">:
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> m_nLevel;                        </span><span class="cpp1-comment">// Level of the item 
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> m_bVisible;                      </span><span class="cpp1-comment">//  
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> m_bSelected;                     </span><span class="cpp1-comment">// selected
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> m_bGrey;                         </span><span class="cpp1-comment">// grey or not 1 grey 0 not 
+</span><span class="cpp1-identifier">uchar type();
+
+  Fl_Pixmap *m_PixmapPicture;          </span><span class="cpp1-comment">// item's picture 
+</span><span class="cpp1-space">  
+  Fl_Ext_TreeItem *m_pPrev;            </span><span class="cpp1-comment">// Previous item
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *m_pNext;            </span><span class="cpp1-comment">// Next Item
+</span><span class="cpp1-space">  
+  </span><span class="cpp1-comment">// USER callbacks 
+</span><span class="cpp1-space">  
+   </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">void</span><span class="cpp1-space">  HandleFree(</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> );   </span><span class="cpp1-comment">// When Item deleted and Mem cleaned 
+</span><span class="cpp1-space"> 
+};
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-preprocessor">#endif </span><span class="cpp1-comment">// FL_EXT_TREE_ITEM_H
+
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+</span></span>
+</code></pre>
+</body>
+</html>

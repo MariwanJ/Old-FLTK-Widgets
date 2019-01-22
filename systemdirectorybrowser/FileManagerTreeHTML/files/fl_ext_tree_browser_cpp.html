@@ -1,0 +1,1817 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>fl_ext_tree_browser_cpp.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #3366FF; font-weight: bold; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #4CCC4C; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+// Fl_Ext_TreeBrowser.cpp  v 0.0.1                              2006-06-19 
+//
+//         for the Fast Light Tool Kit (FLTK) 1.1.x .
+//
+// Copyright 1998-2003 by Mariwan Jalal, Don Zimmer, Bill Spitzak   &amp; others.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Library General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Library General Public License for more details.
+//
+// You should have received a copy of the GNU Library General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+// USA.
+//
+// Please report all bugs and problems to &quot;fltk_kurdi@yahoo.com&quot;.
+//
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-preprocessor">#include &lt;iostream&gt;
+</span><span class="cpp1-reservedword">using</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">namespace</span><span class="cpp1-space"> std;
+</span><span class="cpp1-preprocessor">#define DISPLAY_SEARCH_BOTH_WAYS_AT_ONCE
+
+#include &lt;FL/Fl.H&gt;
+#include &lt;FL/Fl_Widget.H&gt;
+#include &lt;FL/fl_draw.H&gt;
+
+#include &lt;FL/Fl_Pixmap.H&gt;
+
+#include &quot;fl_ext_tree_browser.h&quot;
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &quot;fl_systemdirectory_icons.h&quot;
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+// this function is not implimented .. or left to the user
+// at selecting or deselecting occure the callback depending on bState  1 is select 0 is deselect
+</span><span class="cpp1-space"> 
+   </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">   Fl_Ext_TreeBrowser::HandleSelect(Fl_Ext_TreeItem* pData, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bState)  </span><span class="cpp1-comment">// A Callback function pointer left for the user : + - clicked callback 
+</span><span class="cpp1-space">      {
+   </span><span class="cpp1-comment">// Left to the user to write the functions
+</span><span class="cpp1-space">        </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+   }
+</span><span class="cpp1-comment">//  When double click has been occured
+</span><span class="cpp1-space">   </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">   Fl_Ext_TreeBrowser::HandleInvoke(Fl_Ext_TreeItem *ItemSquareClicked)              </span><span class="cpp1-comment">// A Callback function pointer left for the user :  Clicked + or - callback 
+</span><span class="cpp1-space">      {
+   </span><span class="cpp1-comment">// Left to the user to write the functions
+</span><span class="cpp1-space">     </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">; 
+   }
+   </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">   Fl_Ext_TreeBrowser::HandleMenu(</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *pData)       
+
+   {
+   </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+   </span><span class="cpp1-comment">// Left to the user to write the functions
+</span><span class="cpp1-space">   }
+
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+/// function for setting the last item's name
+//////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::SetLastItem(Fl_Ext_TreeItem* pItem)
+{
+Fl_Ext_TreeBrowser::m_pLast=pItem;
+}
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// Set the first item in the tree
+//////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem* Fl_Ext_TreeBrowser::item_first()  
+{
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::m_pFirst;
+}
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// Get Last item in the tree 
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem* Fl_Ext_TreeBrowser::item_last()  
+{
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::m_pLast;
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// Get the next item ... this is not nessesary 
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem *Fl_Ext_TreeBrowser::item_next(Fl_Ext_TreeItem *l) 
+{
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l) </span><span class="cpp1-comment">// avoid error
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> l-&gt;m_pNext;
+  </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// Get the prev item ... this is not nessesary 
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem *Fl_Ext_TreeBrowser::item_prev(Fl_Ext_TreeItem *l) 
+{
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l) </span><span class="cpp1-comment">// avoid error
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> l-&gt;m_pPrev; 
+  </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// Calculate Item width for an Item 
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::item_width(Fl_Ext_TreeItem *v)  
+{
+  Fl_Ext_TreeItem *pItem = v ; 
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!pItem-&gt;m_bVisible) 
+      </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> w = </span><span class="cpp1-number">3</span><span class="cpp1-space"> + pItem-&gt;m_nLevel*</span><span class="cpp1-number">20</span><span class="cpp1-symbol">;
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (pItem-&gt;IsParent()) 
+  {
+    w += </span><span class="cpp1-number">14</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// extra 4 for space after box
+</span><span class="cpp1-space">  }
+  </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (pItem-&gt;m_nLevel)
+  {
+    w += </span><span class="cpp1-number">4</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// extra 4 to line up with parent
+</span><span class="cpp1-space">  }
+
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bGrey = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  bGrey = pItem-&gt;GetGrey(); </span><span class="cpp1-comment">// check if the item is Greyed
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(bGrey)
+  {
+    fl_font(textfont()+FL_ITALIC, textsize());
+  }
+  </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">  {
+    fl_font(textfont(), textsize());
+  }
+  
+  w += </span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">(fl_width(pItem-&gt;GetName()));
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> w;
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// Return the Item hight
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::item_height(Fl_Ext_TreeItem *l)  
+{
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> (l-&gt;m_bVisible)?textsize()+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">:</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;  </span><span class="cpp1-comment">// +4 added by mariwan
+</span><span class="cpp1-symbol">}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//Draw one item in the list
+//////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::item_draw(Fl_Ext_TreeItem *v, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> x, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> y, </span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">, </span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">)  
+{
+  Fl_Ext_TreeItem *pItem = v;
+
+  </span><span class="cpp1-comment">// left edge
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">  x += </span><span class="cpp1-number">3</span><span class="cpp1-space"> + pItem-&gt;m_nLevel * </span><span class="cpp1-number">10</span><span class="cpp1-symbol">;
+
+  </span><span class="cpp1-comment">// text x
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> tx = x;
+
+  </span><span class="cpp1-comment">// parent x
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> px = x - </span><span class="cpp1-number">10</span><span class="cpp1-symbol">;
+
+  </span><span class="cpp1-comment">// colour
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">//
+
+</span><span class="cpp1-space">  fl_color(FL_BLACK); </span><span class="cpp1-comment">// list's lines drawn black .. change here if you want another color for the list
+
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">// tree branch lines
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;IsParent()) 
+  {
+    </span><span class="cpp1-comment">// box with '-' inside
+</span><span class="cpp1-space">    fl_rect(x, y+</span><span class="cpp1-number">3</span><span class="cpp1-symbol">, </span><span class="cpp1-number">9</span><span class="cpp1-symbol">, </span><span class="cpp1-number">9</span><span class="cpp1-symbol">);
+    fl_line(x+</span><span class="cpp1-number">2</span><span class="cpp1-symbol">, y+</span><span class="cpp1-number">7</span><span class="cpp1-symbol">, x+</span><span class="cpp1-number">6</span><span class="cpp1-symbol">, y+</span><span class="cpp1-number">7</span><span class="cpp1-symbol">);
+
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (pItem-&gt;IsOpen()) 
+    {
+      </span><span class="cpp1-comment">// south connector  to the box
+</span><span class="cpp1-space">      fl_line(x+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">, y+</span><span class="cpp1-number">11</span><span class="cpp1-symbol">, x+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">, y+</span><span class="cpp1-number">13</span><span class="cpp1-symbol">+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">);  </span><span class="cpp1-comment">// Small line from the box to the next item Mariwan
+</span><span class="cpp1-space">    } 
+    </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+    {
+      </span><span class="cpp1-comment">// turn '-' into '+'
+</span><span class="cpp1-space">      fl_line(x+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">, y+</span><span class="cpp1-number">5</span><span class="cpp1-symbol">, x+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">, y+</span><span class="cpp1-number">9</span><span class="cpp1-symbol">); 
+    }
+
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;m_nLevel)
+    {
+      </span><span class="cpp1-comment">// west connector to parent // connenction between the vertical line and the rectangle.
+</span><span class="cpp1-space">        fl_line(px+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">, y+</span><span class="cpp1-number">7</span><span class="cpp1-symbol">, x, y+</span><span class="cpp1-number">7</span><span class="cpp1-symbol">);
+    }
+
+    tx += </span><span class="cpp1-number">14</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// extra 4 for space after box
+</span><span class="cpp1-space">  }
+  </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;m_nLevel) 
+  {
+    tx += </span><span class="cpp1-number">14</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// extra 4 to line up with parent // added 10 by Mariwan 
+
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// west connector to parent
+</span><span class="cpp1-space">    fl_line(px+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">, y+</span><span class="cpp1-number">7</span><span class="cpp1-symbol">, px+</span><span class="cpp1-number">8</span><span class="cpp1-symbol">+</span><span class="cpp1-number">10</span><span class="cpp1-symbol">, y+</span><span class="cpp1-number">7</span><span class="cpp1-symbol">); </span><span class="cpp1-comment">// added 10 by mariwan  // connenction between the vertical line and the rectangle.
+</span><span class="cpp1-space">  }
+
+  </span><span class="cpp1-comment">// north and south connetors to parent
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;m_nLevel)
+  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;IsLastSibling())
+    {
+       fl_line(px+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">, y-</span><span class="cpp1-number">2</span><span class="cpp1-symbol">, px+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">, y+</span><span class="cpp1-number">7</span><span class="cpp1-symbol">); 
+    }
+    </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">    {
+      fl_line(px+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">, y-</span><span class="cpp1-number">2</span><span class="cpp1-symbol">, px+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">, y+</span><span class="cpp1-number">13</span><span class="cpp1-symbol">+</span><span class="cpp1-number">2</span><span class="cpp1-symbol">); 
+    }
+  }
+
+  </span><span class="cpp1-comment">// disconnected brach lines from previous levels, start up two
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *pParent = pItem-&gt;GetParent();
+  </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pParent)
+  {
+    px -= </span><span class="cpp1-number">10</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pParent-&gt;m_nLevel)
+    {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!pParent-&gt;IsLastSibling())
+      {
+        fl_line(px+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">, y-</span><span class="cpp1-number">2</span><span class="cpp1-symbol">, px+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">, y+</span><span class="cpp1-number">13</span><span class="cpp1-symbol">+</span><span class="cpp1-number">2</span><span class="cpp1-symbol">); </span><span class="cpp1-comment">// -2 Added by Mariwan and +2 after 13 added by Mariwan
+</span><span class="cpp1-space">      }
+    }
+    pParent = pParent-&gt;GetParent();
+  }
+  
+  </span><span class="cpp1-comment">// draw text
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bGrey = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  bGrey = pItem-&gt;GetGrey();
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(bGrey) </span><span class="cpp1-comment">// Enable or dissable code is here for changing the color
+</span><span class="cpp1-space">  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;m_bSelected)
+    {
+    </span><span class="cpp1-comment">//SAIRI AMA BIKA
+</span><span class="cpp1-space">      fl_color(fl_contrast(FL_INACTIVE_COLOR,FL_SELECTION_COLOR));
+    }
+    </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+    {
+      fl_color(FL_INACTIVE_COLOR);
+    }
+    fl_font(textfont()+FL_ITALIC, textsize());  </span><span class="cpp1-comment">// Origional
+</span><span class="cpp1-space">  }
+  </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;m_bSelected)
+    {
+    </span><span class="cpp1-comment">// Decide which color should be used for selecting the text
+</span><span class="cpp1-space">      fl_color(FL_GRAY);
+    }
+    </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+    {
+      fl_color(textcolor());
+    }
+
+    fl_font(textfont(), textsize());
+  }
+
+
+  {
+
+   </span><span class="cpp1-comment">//draw text 
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;m_bSelected)
+    </span><span class="cpp1-comment">// draw the box under the text 
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// Selection in a new way .. this draw the selection box around the text.
+</span><span class="cpp1-space">          draw_box(box() ? box() : FL_DOWN_BOX, tx+</span><span class="cpp1-number">24</span><span class="cpp1-space"> , y+</span><span class="cpp1-number">2</span><span class="cpp1-space"> , (</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">)(fl_width(pItem-&gt;GetName())) ,</span><span class="cpp1-number">15</span><span class="cpp1-symbol">-</span><span class="cpp1-number">2</span><span class="cpp1-symbol">,color()); 
+
+
+
+    fl_color(FL_BLACK);  </span><span class="cpp1-comment">/// This make Font of the Items black when it is selected. Mariwan
+</span><span class="cpp1-space">    fl_draw(pItem-&gt;GetName(), tx+</span><span class="cpp1-number">24</span><span class="cpp1-symbol">, y+</span><span class="cpp1-number">13</span><span class="cpp1-symbol">); </span><span class="cpp1-comment">// draw text 
+</span><span class="cpp1-space">    
+    </span><span class="cpp1-comment">// Draw focus when the arrow key pressed
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((pItem == selection_) &amp;&amp; (Fl::focus() == </span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">))
+      {
+       draw_focus(FL_NO_BOX, tx+</span><span class="cpp1-number">22</span><span class="cpp1-space"> , y+</span><span class="cpp1-number">2</span><span class="cpp1-space"> , (</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">)(fl_width(pItem-&gt;GetName()))+</span><span class="cpp1-number">4</span><span class="cpp1-space"> ,</span><span class="cpp1-number">15</span><span class="cpp1-symbol">);       
+      }
+    
+     </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(pItem-&gt;m_PixmapPicture==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)) </span><span class="cpp1-comment">// Draw Icon
+</span><span class="cpp1-space">       pItem-&gt;m_PixmapPicture-&gt;draw(tx,y);</span><span class="cpp1-comment">// fl_draw_pixmap(Folder_xpm ,tx,y,FL_BACKGROUND2_COLOR );
+</span><span class="cpp1-space">         
+  }
+}
+
+
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// additions
+//////////////////////////////////////////////////////////////////////
+
+// Add item                                           1                     2
+//       2 after item 1
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem* Fl_Ext_TreeBrowser::Add(Fl_Ext_TreeItem *pItemBase, Fl_Ext_TreeItem* pItemNew, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bSelect )
+
+{
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((pItemNew==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">))   </span><span class="cpp1-comment">// check if not the sent item is zero
+</span><span class="cpp1-space">  {
+        </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> pItemBase;
+  }
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">((pItemBase==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)) </span><span class="cpp1-comment">// check if not the base item is zero
+</span><span class="cpp1-space">  {
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(Add(pItemNew, bSelect)) )  </span><span class="cpp1-comment">// nothing in the list so just add this item
+</span><span class="cpp1-space">	  {
+        </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> pItemBase;  </span><span class="cpp1-comment">// if somting wrong happend 
+</span><span class="cpp1-space">	  }
+  </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+	  {
+       	</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> pItemNew;  </span><span class="cpp1-comment">// return the added
+</span><span class="cpp1-space">  
+	  }
+  }
+
+  Fl_Ext_TreeItem *pHead = pItemBase; </span><span class="cpp1-comment">// Root
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *pTail = pItemBase-&gt;m_pNext;</span><span class="cpp1-comment">// Sub
+
+</span><span class="cpp1-space">  pHead-&gt;m_pNext = pItemNew; </span><span class="cpp1-comment">// Add new  link to new item
+</span><span class="cpp1-space">  pItemNew-&gt;m_pPrev = pHead;  </span><span class="cpp1-comment">// Add newitem link to the old item
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *pAddedItem = pItemNew;
+ 
+  </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pAddedItem-&gt;m_pNext) </span><span class="cpp1-comment">// Check if no this item contain a chain of linked items if so go the the end Mariwan
+</span><span class="cpp1-space">  {
+    pAddedItem = pAddedItem-&gt;m_pNext;
+  }
+
+  pAddedItem-&gt;m_pNext = pTail;   </span><span class="cpp1-comment">// Set the last added items next to the pTail (the old item saved before) mariwan
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (pTail) 
+	  pTail-&gt;m_pPrev = pAddedItem; </span><span class="cpp1-comment">// if not the last item is what we added ... link it together    mariwan
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+	  m_pLast = pAddedItem;
+
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> rc = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(bSelect)  </span><span class="cpp1-comment">// if needs to be selected
+</span><span class="cpp1-space">     rc = Select(pItemNew);   </span><span class="cpp1-comment">// select the item
+</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;visible())
+    redraw();  </span><span class="cpp1-comment">/// redraw  the tree
+</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> pAddedItem;  </span><span class="cpp1-comment">// return the item (s) added
+</span><span class="cpp1-symbol">}
+
+
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////*********
+// additions  --- this will remain for further development - Mariwan
+//////////////////////////////////////////////////////////////////////*********
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::Add(Fl_Ext_TreeItem *pItemNew, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bSelect </span><span class="cpp1-comment">/* =0 */</span><span class="cpp1-symbol">)
+{
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((pItemNew==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">))
+  {
+
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;   </span><span class="cpp1-comment">// Item sent was an error
+</span><span class="cpp1-space">  }
+</span><span class="cpp1-reservedword">else
+</span><span class="cpp1-symbol">{
+
+  Fl_Ext_TreeItem *pNext;
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> rc;
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!m_pFirst) </span><span class="cpp1-comment">// it is the first item
+</span><span class="cpp1-space">  {
+      m_pFirst = pItemNew;</span><span class="cpp1-comment">//  first item is equal to the item will be added
+</span><span class="cpp1-space">      m_pLast = pItemNew; </span><span class="cpp1-comment">//  last item also equal to the item will be added
+</span><span class="cpp1-space">      pNext = pItemNew-&gt;m_pNext; </span><span class="cpp1-comment">// pnext .. temp item is equal to item added next
+</span><span class="cpp1-space">      </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pNext)               </span><span class="cpp1-comment">// if pnext available 
+</span><span class="cpp1-space">      { 
+        m_pLast = pNext;        </span><span class="cpp1-comment">// find last item to the last item pointer
+</span><span class="cpp1-space">        pNext = pNext-&gt;m_pNext; </span><span class="cpp1-comment">// 
+</span><span class="cpp1-space">       }
+  }
+  </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+  {
+      pItemNew-&gt;m_pPrev = m_pLast;  </span><span class="cpp1-comment">// m_pFirst not available .. zero .. Set added item previous to last item
+</span><span class="cpp1-space">      m_pLast-&gt;m_pNext = pItemNew;  </span><span class="cpp1-comment">// next to last item -is equil to item added
+
+</span><span class="cpp1-space">      m_pLast = pItemNew;            </span><span class="cpp1-comment">// last item is equal to item added
+</span><span class="cpp1-space">      pNext = pItemNew-&gt;m_pNext;     </span><span class="cpp1-comment">// temp pointer is iequal to 
+</span><span class="cpp1-space">      </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pNext)                   </span><span class="cpp1-comment">// set m_pLast to the end
+</span><span class="cpp1-space">      {
+        m_pLast = pNext; 
+        pNext = pNext-&gt;m_pNext; 
+      }
+ }
+
+  </span><span class="cpp1-comment">// show siblings
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *pParent = pItemNew-&gt;GetParent();
+
+  rc = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(bSelect) rc = Select(pItemNew);
+
+   redraw();
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> rc;
+ }
+}
+
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// this function is useless ... because add will do the job.
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::InsertAfter(Fl_Ext_TreeItem *pItemBase, Fl_Ext_TreeItem *pItemNew, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bSelect </span><span class="cpp1-comment">/* =0 */</span><span class="cpp1-symbol">)
+{
+        </span><span class="cpp1-comment">//                       1       2          select or not
+</span><span class="cpp1-space"> Fl_Ext_TreeItem *pItem=Add(pItemBase, pItemNew, bSelect );
+
+</span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (pItem)
+ </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+ </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+ </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+}
+
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// remove one item in the list
+//////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::Remove(Fl_Ext_TreeItem *pItem) 
+{ 
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> _Remove(pItem, </span><span class="cpp1-number">1</span><span class="cpp1-symbol">); 
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+// this will cut the tree letting the pItem along withits branch
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::Prune(Fl_Ext_TreeItem *pItem) 
+{ 
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> _Remove(pItem, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">); 
+}
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// remove pTreeItem and all children, freeing memory
+// if bFree is One it will free the memory .. when bFree is zero .. unknown results will occure?? Mariwan
+//////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::_Remove(Fl_Ext_TreeItem *pItem, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bFree)
+{
+  Fl_Ext_TreeItem *pNext;
+  Fl_Ext_TreeItem *pSelected = selection_;
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!pItem) </span><span class="cpp1-comment">// entire tree (all the tree all the items)
+</span><span class="cpp1-space">  {
+    pItem = m_pFirst;
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!pItem) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+    Select((Fl_Ext_TreeItem*)(NULL));
+    m_pFirst = m_pLast = NULL;
+    new_list();
+
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(bFree)
+    {
+      </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pItem)
+      {
+        pNext = pItem-&gt;m_pNext;
+        pItem = pNext;
+      }
+    }
+  }
+  </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> </span><span class="cpp1-comment">// just this branch
+</span><span class="cpp1-space">  {
+    Fl_Ext_TreeItem *pPrev = pItem-&gt;m_pPrev; </span><span class="cpp1-comment">// Get item before Mariwan
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nLevel = pItem-&gt;m_nLevel;            </span><span class="cpp1-comment">// Get Item  level
+
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// cap off pruned branch at head
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// this will cut the branchs head ... why??? strange
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!bFree)  </span><span class="cpp1-comment">// if bFree is Zero
+</span><span class="cpp1-space">          pItem-&gt;m_pPrev = NULL;
+    </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pItem)
+    {
+      pNext = pItem-&gt;m_pNext;
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem == pSelected) 
+
+         pSelected=NULL;
+         pItem-&gt;m_bSelected=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+</span><span class="cpp1-comment">//       Select((Fl_Ext_TreeItem*)(NULL));              //       this cause Segmentation fault?????
+</span><span class="cpp1-space">      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(bFree) </span><span class="cpp1-comment">// if bFree is 1  so delete the item and free the memory
+</span><span class="cpp1-space">      {
+   	    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (pItem)
+	      </span><span class="cpp1-reservedword">delete</span><span class="cpp1-space"> pItem; </span><span class="cpp1-comment">// deletes data also
+</span><span class="cpp1-space">	      pItem=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+      }
+      pItem = pNext;
+
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem) </span><span class="cpp1-comment">// if the last item deleted was not the last one in the tree
+</span><span class="cpp1-space">      {
+        </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;m_nLevel &lt;= nLevel) </span><span class="cpp1-comment">// when it is the end of the sub branch stop
+</span><span class="cpp1-space">        {
+          </span><span class="cpp1-comment">// cap off pruned branch at tail
+</span><span class="cpp1-space">          </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!bFree) 
+              pItem-&gt;m_pPrev-&gt;m_pNext = NULL;
+          </span><span class="cpp1-comment">// end of branch - done
+</span><span class="cpp1-space">          </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+        }
+      }
+    }
+    </span><span class="cpp1-comment">// fix up links
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem) </span><span class="cpp1-comment">// if still there itiems
+</span><span class="cpp1-space">    {
+       pItem-&gt;m_pPrev = pPrev;
+       </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pPrev) 
+        {
+          pPrev-&gt;m_pNext = pItem;
+        }
+      </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">       {
+         m_pFirst = pItem; 
+       }
+    }
+    </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">    {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pPrev) 
+      {
+        pPrev-&gt;m_pNext = NULL;
+        m_pLast = pPrev;
+      }
+      </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">      {
+        m_pFirst = m_pLast = NULL;
+      }
+    }
+    </span><span class="cpp1-comment">// fix up selection
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!selection() &amp;&amp; pSelected)
+    {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pPrev)
+      {
+        </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pPrev-&gt;m_pNext) Select(pPrev-&gt;m_pNext);
+        </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> Select(pPrev);
+      }
+      </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(m_pFirst) 
+      {
+        Select(m_pFirst);
+      }
+    }
+
+    redraw();
+  }
+
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// Convert Item's selection condition  if selected --&gt; deselect or reverse of that
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::Select(Fl_Ext_TreeItem *pItem)
+{
+Fl_Ext_TreeItem *pSelected = selection_;
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pSelected == pItem) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+
+  </span><span class="cpp1-comment">// deselect old
+</span><span class="cpp1-space">  
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pSelected) </span><span class="cpp1-comment">// Old item to be deselected
+</span><span class="cpp1-space">  {
+   
+     </span><span class="cpp1-comment">// call handleSelect with the indication that unselect have done
+</span><span class="cpp1-space">      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!HandleSelect(pSelected, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">)) </span><span class="cpp1-comment">// Changed by Mariwan
+</span><span class="cpp1-space">      {
+        </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!pItem) 
+           </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// allow Select(NULL) to pass
+</span><span class="cpp1-space">      }
+    pSelected-&gt;m_bSelected = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  }
+
+  </span><span class="cpp1-comment">// select new
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">//
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem)
+  {
+    {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!HandleSelect(pItem, </span><span class="cpp1-number">1</span><span class="cpp1-symbol">))
+      {
+        </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pSelected) </span><span class="cpp1-comment">// re-select old
+</span><span class="cpp1-space">        {
+           HandleSelect(pSelected, </span><span class="cpp1-number">1</span><span class="cpp1-symbol">);
+           pSelected-&gt;m_bSelected = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+        }
+        </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+      }
+    }
+
+    </span><span class="cpp1-comment">// make sure we can see the selection 
+</span><span class="cpp1-space">    
+    Fl_Ext_TreeItem *pParent = pItem-&gt;GetParent();
+    </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pParent) 
+    {
+     pParent-&gt;SetBranchVisible(</span><span class="cpp1-number">1</span><span class="cpp1-symbol">);
+     pParent = pParent-&gt;GetParent(); 
+     }
+    
+    pItem-&gt;m_bSelected = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+    select(pItem);
+  }
+  </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">  {
+    deselect();
+  }
+
+  redraw();
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// selects the nth visible line
+//////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::Select(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nLine)
+{
+  Fl_Ext_TreeItem *pItem = m_pFirst;
+
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> i = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+  </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pItem)
+  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;m_bVisible) i++;
+
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(i == nLine) </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+
+    pItem = pItem-&gt;m_pNext;
+  }
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> Select(pItem);
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// selects the last visible line at a level
+//////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::SelectLast(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nLevel)
+{
+  Fl_Ext_TreeItem *pItem = m_pLast;
+
+  </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pItem)
+  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;m_bVisible &amp;&amp; pItem-&gt;m_nLevel == nLevel) 
+       </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+
+    pItem = pItem-&gt;m_pPrev;
+  }
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem) 
+    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> Select(pItem);
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// Return current selected item or Last selected item
+//////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem *Fl_Ext_TreeBrowser::Selection(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">) 
+{
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> *selection();
+}
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// Find an item ... this works just when the whole list is available 
+//////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem *Fl_Ext_TreeBrowser::Find(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> (*pFunc)(</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *a, </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *b), </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *pArg)
+{
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!pFunc) 
+      pFunc = _s_DefaultFindFunc;
+
+  Fl_Ext_TreeItem *pItem = m_pFirst;
+
+  </span><span class="cpp1-reservedword">while</span><span class="cpp1-symbol">(pItem)
+  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pFunc(pItem-&gt;m_pData, pArg)) </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+    pItem = pItem-&gt;m_pNext;
+  }
+
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> pItem;
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+// support
+//////////////////////////////////////////////////////////////////////
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::_s_DefaultFindFunc(</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *a, </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *b)
+{
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> (a == b)?</span><span class="cpp1-number">1</span><span class="cpp1-symbol">:</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+}
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+// default do-nothing callback, user template
+//
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::_s_DefaultCallback(Fl_Widget *o, </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *)
+{
+</span><span class="cpp1-preprocessor">#ifdef DEBUG
+</span><span class="cpp1-comment">// write you code here
+</span><span class="cpp1-symbol">;
+</span><span class="cpp1-preprocessor">#endif
+</span><span class="cpp1-symbol">}
+</span><span class="cpp1-comment">//////  Ama chak bika halaya
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::clear() 
+{
+Fl_Ext_TreeItem *pSaveItemBefore=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+     Fl_Ext_TreeItem *pScanItem=item_last();
+
+     </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> (pScanItem)
+     {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (pScanItem-&gt;m_pPrev)
+         pSaveItemBefore=pScanItem-&gt;m_pPrev;
+        </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (pScanItem-&gt;m_PixmapPicture)
+           free (pScanItem-&gt;m_PixmapPicture);
+        </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (pScanItem)
+           free(pScanItem);
+  	   </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (pScanItem)
+           </span><span class="cpp1-reservedword">delete</span><span class="cpp1-space"> (pScanItem);
+        pScanItem=pSaveItemBefore;
+        new_list();
+       }
+}
+
+</span><span class="cpp1-comment">// check this Mariwan
+</span><span class="cpp1-reservedword">static</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> scrollbar_callback(Fl_Widget* s, </span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">*) {
+  ((Fl_Ext_TreeBrowser*)(s-&gt;parent()))-&gt;position(</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">(((Fl_Scrollbar*)s)-&gt;value()));
+}
+
+</span><span class="cpp1-reservedword">static</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> hscrollbar_callback(Fl_Widget* s, </span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">*) {
+  ((Fl_Ext_TreeBrowser*)(s-&gt;parent()))-&gt;hposition(</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">(((Fl_Scrollbar*)s)-&gt;value()));
+}
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::scrollbar_width_ = </span><span class="cpp1-number">16</span><span class="cpp1-symbol">;
+
+</span><span class="cpp1-comment">// return where to draw the actual box:
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::bbox(</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">&amp; X, </span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">&amp; Y, </span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">&amp; W, </span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">&amp; H) </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> {
+  Fl_Boxtype b = box() ? box() : FL_DOWN_BOX;
+  X = x()+Fl::box_dx(b);
+  Y = y()+Fl::box_dy(b);
+  W = w()-Fl::box_dw(b);
+  H = h()-Fl::box_dh(b);
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (scrollbar.visible()) {
+    W -= scrollbar_width_;
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (scrollbar.align() &amp; FL_ALIGN_LEFT) X += scrollbar_width_;
+  }
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (W &lt; </span><span class="cpp1-number">0</span><span class="cpp1-symbol">) W = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (hscrollbar.visible()) {
+    H -= scrollbar_width_;
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (scrollbar.align() &amp; FL_ALIGN_TOP) Y += scrollbar_width_;
+  }
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (H &lt; </span><span class="cpp1-number">0</span><span class="cpp1-symbol">) H = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+}
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::leftedge() </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> 
+{
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> X, Y, W, H; 
+  bbox(X, Y, W, H);
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> X;
+}
+
+</span><span class="cpp1-comment">// The scrollbars may be moved again by draw(), since each one's size
+// depends on whether the other is visible or not.  This skips over
+// Fl_Group::resize since it moves the scrollbars uselessly.
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::resize(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> X, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Y, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> W, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> H) 
+{
+  Fl_Widget::resize(X, Y, W, H);
+  </span><span class="cpp1-comment">// move the scrollbars so they can respond to events:
+</span><span class="cpp1-space">  bbox(X,Y,W,H);
+  scrollbar.resize(
+  
+	scrollbar.align()&amp;FL_ALIGN_LEFT ? X-scrollbar_width_ : X+W,Y, scrollbar_width_, H);
+  hscrollbar.resize(X, scrollbar.align()&amp;FL_ALIGN_TOP ? Y-scrollbar_width_ : Y+H,W, scrollbar_width_);
+  }
+
+</span><span class="cpp1-comment">// Cause minimal update to redraw the given item:
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::redraw_line(Fl_Ext_TreeItem* l) {
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!redraw1 || redraw1 == l) {redraw1 = l; damage(FL_DAMAGE_EXPOSE);}
+  </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!redraw2 || redraw2 == l) {redraw2 = l; damage(FL_DAMAGE_EXPOSE);}
+  </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> damage(FL_DAMAGE_SCROLL);
+}
+
+</span><span class="cpp1-comment">// Figure out top() based on position():
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::update_top() {
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!top_) top_ = item_first();
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (position_ != real_position_) {
+    Fl_Ext_TreeItem* l;
+    </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> ly;
+    </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> yy = position_;
+    </span><span class="cpp1-comment">// start from either head or current position, whichever is closer:
+</span><span class="cpp1-space">    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!top_ || yy &lt;= (real_position_/</span><span class="cpp1-number">2</span><span class="cpp1-symbol">)) {
+      l = item_first();
+      ly = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    } </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> {
+      l = top_;
+      ly = real_position_-offset_;
+    }
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!l) {
+      top_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+      offset_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+      real_position_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    } </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> {
+      </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> hh = item_quick_height(l);
+      </span><span class="cpp1-comment">// step through list until we find line containing this point:
+</span><span class="cpp1-space">      </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> (ly &gt; yy) {
+	Fl_Ext_TreeItem* l1 = item_prev(l);
+	</span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!l1) {ly = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">; </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;} </span><span class="cpp1-comment">// hit the top
+</span><span class="cpp1-space">	l  = l1;
+	hh = item_quick_height(l);
+	ly -= hh;
+      }
+      </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> ((ly+hh) &lt;= yy) {
+	Fl_Ext_TreeItem* l1 = item_next(l);
+	</span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!l1) {yy = ly+hh-</span><span class="cpp1-number">1</span><span class="cpp1-symbol">; </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}
+	l = l1;
+	ly += hh;
+	hh = item_quick_height(l);
+      }
+      </span><span class="cpp1-comment">// top item must *really* be visible, use slow height:
+</span><span class="cpp1-space">      </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (;;) {
+	hh = item_height(l);
+	</span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((ly+hh) &gt; yy) </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">// it is big enough to see
+</span><span class="cpp1-space">	</span><span class="cpp1-comment">// go up to top of previous item:
+</span><span class="cpp1-space">	Fl_Ext_TreeItem* l1 = item_prev(l);
+	</span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!l1) {ly = yy = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">; </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;} </span><span class="cpp1-comment">// hit the top
+</span><span class="cpp1-space">	l = l1; yy = position_ = ly = ly-item_quick_height(l);
+      }
+      </span><span class="cpp1-comment">// use it:
+</span><span class="cpp1-space">      top_ = l;
+      offset_ = yy-ly;
+      real_position_ = yy;
+    }
+    damage(FL_DAMAGE_SCROLL);
+  }
+}
+
+</span><span class="cpp1-comment">// Change position(), top() will update when update_top() is called
+// (probably by draw() or handle()):
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::position(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> yy) {
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (yy &lt; </span><span class="cpp1-number">0</span><span class="cpp1-symbol">) yy = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (yy == position_) </span><span class="cpp1-reservedword">return</span><span class="cpp1-symbol">;
+  position_ = yy;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (yy != real_position_) redraw_lines();
+}
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::hposition(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> xx) {
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (xx &lt; </span><span class="cpp1-number">0</span><span class="cpp1-symbol">) xx = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (xx == hposition_) </span><span class="cpp1-reservedword">return</span><span class="cpp1-symbol">;
+  hposition_ = xx;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (xx != real_hposition_) redraw_lines();
+}
+
+</span><span class="cpp1-comment">// Tell whether item is currently displayed:
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::displayed(Fl_Ext_TreeItem* p)  
+{
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> X, Y, W, H; bbox(X, Y, W, H);
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> yy = H+offset_;
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (Fl_Ext_TreeItem* l = top_; l &amp;&amp; yy &gt; </span><span class="cpp1-number">0</span><span class="cpp1-symbol">; l = item_next(l))
+  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l == p) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+    yy -= item_height(l);
+  }
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+}
+
+</span><span class="cpp1-comment">// Ensure this item is displayed:
+// Messy because we have no idea if it is before top or after bottom:
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::display(Fl_Ext_TreeItem* p) 
+{
+
+  </span><span class="cpp1-comment">// First special case - want to display first item in the list?
+</span><span class="cpp1-space">  update_top();
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (p == item_first()) 
+  {
+        position(</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+         </span><span class="cpp1-reservedword">return</span><span class="cpp1-symbol">;
+  }
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> X, Y, W, H, Yp; 
+  bbox(X, Y, W, H);
+  Fl_Ext_TreeItem* l = top_;
+  Y = Yp = -offset_;
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> h1;
+
+  </span><span class="cpp1-comment">// 2nd special case - want to display item already displayed at top of browser?
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l == p) {position(real_position_+Y); </span><span class="cpp1-reservedword">return</span><span class="cpp1-symbol">;} </span><span class="cpp1-comment">// scroll up a bit
+
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">// 3rd special case - want to display item just above top of browser?
+</span><span class="cpp1-space">  Fl_Ext_TreeItem* lp = item_prev(l);
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (lp == p) {position(real_position_+Y-item_quick_height(lp)); </span><span class="cpp1-reservedword">return</span><span class="cpp1-symbol">;}
+
+</span><span class="cpp1-preprocessor">#ifdef DISPLAY_SEARCH_BOTH_WAYS_AT_ONCE
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">// search for item.  We search both up and down the list at the same time,
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">// this evens up the execution time for the two cases - the old way was
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">// much slower for going up than for going down.
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> (l || lp) 
+  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l) {
+      h1 = item_quick_height(l);
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l == p) {
+	</span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (Y &lt;= H) { </span><span class="cpp1-comment">// it is visible or right at bottom
+</span><span class="cpp1-space">	  Y = Y+h1-H; </span><span class="cpp1-comment">// find where bottom edge is
+</span><span class="cpp1-space">	  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (Y &gt; </span><span class="cpp1-number">0</span><span class="cpp1-symbol">) position(real_position_+Y); </span><span class="cpp1-comment">// scroll down a bit
+</span><span class="cpp1-space">	} </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> {
+	  position(real_position_+Y-(H-h1)/</span><span class="cpp1-number">2</span><span class="cpp1-symbol">); </span><span class="cpp1-comment">// center it
+</span><span class="cpp1-space">	}
+	</span><span class="cpp1-reservedword">return</span><span class="cpp1-symbol">;
+      }
+      Y += h1;
+      l = item_next(l);
+    }
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (lp) 
+    {
+      h1 = item_quick_height(lp);
+      Yp -= h1;
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (lp == p) 
+      {
+	   </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((Yp + h1) &gt;= </span><span class="cpp1-number">0</span><span class="cpp1-symbol">) 
+          position(real_position_+Yp);
+	   </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+          position(real_position_+Yp-(H-h1)/</span><span class="cpp1-number">2</span><span class="cpp1-symbol">);
+	   </span><span class="cpp1-reservedword">return</span><span class="cpp1-symbol">;
+      }
+      lp = item_prev(lp);
+    }
+  }
+</span><span class="cpp1-preprocessor">#else
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">// Old version went forwards and then backwards:
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">// search forward for it:
+</span><span class="cpp1-space">  l = top_;
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (; l; l = item_next(l)) 
+   {
+    h1 = item_quick_height(l);
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l == p) 
+    {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (Y &lt;= H) { </span><span class="cpp1-comment">// it is visible or right at bottom
+</span><span class="cpp1-space">	Y = Y+h1-H; </span><span class="cpp1-comment">// find where bottom edge is
+</span><span class="cpp1-space">	</span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (Y &gt; </span><span class="cpp1-number">0</span><span class="cpp1-symbol">) position(real_position_+Y); </span><span class="cpp1-comment">// scroll down a bit
+</span><span class="cpp1-space">      } </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> {
+	position(real_position_+Y-(H-h1)/</span><span class="cpp1-number">2</span><span class="cpp1-symbol">); </span><span class="cpp1-comment">// center it
+</span><span class="cpp1-space">      }
+      </span><span class="cpp1-reservedword">return</span><span class="cpp1-symbol">;
+    }
+    Y += h1;
+  }
+  </span><span class="cpp1-comment">// search backward for it, if found center it:
+</span><span class="cpp1-space">  l = lp;
+  Y = -offset_;
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (; l; l = item_prev(l)) {
+    h1 = item_quick_height(l);
+    Y -= h1;
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l == p) {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((Y + h1) &gt;= </span><span class="cpp1-number">0</span><span class="cpp1-symbol">) position(real_position_+Y);
+      </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> position(real_position_+Y-(H-h1)/</span><span class="cpp1-number">2</span><span class="cpp1-symbol">);
+      </span><span class="cpp1-reservedword">return</span><span class="cpp1-symbol">;
+    }
+  }
+</span><span class="cpp1-preprocessor">#endif
+</span><span class="cpp1-symbol">}
+
+</span><span class="cpp1-comment">// redraw, has side effect of updating top and setting scrollbar:
+
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::draw() 
+ {
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> drawsquare = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (damage() &amp; FL_DAMAGE_ALL) 
+   { </span><span class="cpp1-comment">// redraw the box if full redraw
+</span><span class="cpp1-space">    Fl_Boxtype b = box() ? box() : FL_DOWN_BOX;
+    draw_box(b, x(), y(), w(), h(), color());
+    drawsquare = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+   }
+
+  update_top();
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> full_width_ = full_width();
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> full_height_ = full_height();
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> X, Y, W, H; 
+  bbox(X, Y, W, H);
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> dont_repeat = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+J1:
+  </span><span class="cpp1-comment">// see if scrollbar needs to be switched on/off:
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((has_scrollbar_ &amp; VERTICAL) &amp;&amp; ((has_scrollbar_ &amp; ALWAYS_ON) || position_ || full_height_ &gt; H)) 
+   {
+     </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!scrollbar.visible()) 
+      {
+       scrollbar.set_visible();
+       drawsquare = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+       bbox(X, Y, W, H);
+      }
+    }
+    </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+     {
+       top_ = item_first(); real_position_ = offset_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+       </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (scrollbar.visible()) 
+         {
+           scrollbar.clear_visible();
+           clear_damage((uchar)(damage()|FL_DAMAGE_SCROLL));
+         }
+      }
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((has_scrollbar_ &amp; HORIZONTAL) &amp;&amp; ((has_scrollbar_ &amp; ALWAYS_ON) || hposition_ || full_width_ &gt; W)) 
+    {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!hscrollbar.visible()) 
+       {
+         hscrollbar.set_visible();
+         drawsquare = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+         bbox(X, Y, W, H);
+       }
+     } 
+     </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+      {
+        real_hposition_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+        </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (hscrollbar.visible()) 
+         {
+           hscrollbar.clear_visible();
+           clear_damage((uchar)(damage()|FL_DAMAGE_SCROLL));
+         }
+       }
+
+  </span><span class="cpp1-comment">// Check the vertical scrollbar again, just in case it needs to be drawn
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">// because the horizontal one is drawn.  There should be a cleaner way
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">// to do this besides copying the same code...
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((has_scrollbar_ &amp; VERTICAL) &amp;&amp; ((has_scrollbar_ &amp; ALWAYS_ON) || position_ || full_height_ &gt; H)) 
+   {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!scrollbar.visible()) 
+       {
+         scrollbar.set_visible();
+         drawsquare = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+         bbox(X, Y, W, H);
+       }
+   } 
+   </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+     {
+        top_ = item_first(); real_position_ = offset_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+        </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (scrollbar.visible()) 
+        {
+          scrollbar.clear_visible();
+          clear_damage((uchar)(damage()|FL_DAMAGE_SCROLL));
+        }
+     }
+</span><span class="cpp1-comment">/// Sairi ama bika 
+</span><span class="cpp1-space">   bbox(X, Y, W, H);
+  fl_clip(X, Y, W, H);
+
+  </span><span class="cpp1-comment">// for each line, draw it if full redraw or scrolled.  Erase background
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">// if not a full redraw or if it is selected:
+</span><span class="cpp1-space">  Fl_Ext_TreeItem* l = top();
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> yy = -offset_;
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (; l &amp;&amp; yy &lt; H; l = item_next(l)) 
+  {
+    </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> hh = item_height(l);
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (hh &lt;= </span><span class="cpp1-number">0</span><span class="cpp1-symbol">) </span><span class="cpp1-reservedword">continue</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((damage()&amp;(FL_DAMAGE_SCROLL|FL_DAMAGE_ALL)) || l == redraw1 || l == redraw2) 
+    {
+    	fl_push_clip(X, yy+Y, W, hh);
+	</span><span class="cpp1-comment">// A box for erasing the background
+</span><span class="cpp1-space">	</span><span class="cpp1-comment">// This should be available for erasing the wrong drawing on the screen
+</span><span class="cpp1-space">	 draw_box(box() ? box() : FL_DOWN_BOX, x(), y(), w(), h(), color()); </span><span class="cpp1-comment">// this will erase the background
+</span><span class="cpp1-space">	
+	  fl_pop_clip();
+      item_draw(l, X-hposition_, yy+Y, W+hposition_, hh);
+     
+      </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> ww = item_width(l);
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (ww &gt; max_width) {max_width = ww; max_width_item = l;}
+    }
+    yy += hh;
+  }
+  </span><span class="cpp1-comment">// erase the area below last line:
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(damage()&amp;FL_DAMAGE_ALL) &amp;&amp; yy &lt; H) 
+  {
+    fl_push_clip(X, yy+Y, W, H-yy);
+    draw_box(box() ? box() : FL_DOWN_BOX, x(), y(), w(), h(), color());
+    fl_pop_clip();
+  }
+  fl_pop_clip();
+  redraw1 = redraw2 = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!dont_repeat) 
+  {
+    dont_repeat = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-comment">// see if changes to full_height caused by calls to slow_height
+</span><span class="cpp1-space">    </span><span class="cpp1-comment">// caused scrollbar state to change, in which case we have to redraw:
+</span><span class="cpp1-space">    full_height_ = full_height();
+    full_width_ = full_width();
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((has_scrollbar_ &amp; VERTICAL) &amp;&amp; ((has_scrollbar_ &amp; ALWAYS_ON) || position_ || full_height_&gt;H)) 
+    {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!scrollbar.visible()) 
+        </span><span class="cpp1-reservedword">goto</span><span class="cpp1-space"> J1;
+    } 
+    </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+    {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (scrollbar.visible()) 
+        </span><span class="cpp1-reservedword">goto</span><span class="cpp1-space"> J1;
+    }
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((has_scrollbar_ &amp; HORIZONTAL) &amp;&amp;((has_scrollbar_ &amp; ALWAYS_ON) || hposition_ || full_width_&gt;W)) 
+    {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!hscrollbar.visible()) 
+         </span><span class="cpp1-reservedword">goto</span><span class="cpp1-space"> J1;
+    } 
+    </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+    {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (hscrollbar.visible()) 
+        </span><span class="cpp1-reservedword">goto</span><span class="cpp1-space"> J1;
+    }
+  }
+
+  </span><span class="cpp1-comment">// update the scrollbars and redraw them:
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> dy = top_ ? item_quick_height(top_) : </span><span class="cpp1-number">0</span><span class="cpp1-symbol">; </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (dy &lt; </span><span class="cpp1-number">10</span><span class="cpp1-symbol">) dy = </span><span class="cpp1-number">10</span><span class="cpp1-symbol">;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (scrollbar.visible()) 
+  {
+    scrollbar.damage_resize(
+	scrollbar.align()&amp;FL_ALIGN_LEFT ? X-scrollbar_width_ : X+W,
+	Y, scrollbar_width_, H);
+    scrollbar.value(position_, H, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, full_height_);
+    scrollbar.linesize(dy);
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (drawsquare) draw_child(scrollbar);
+    </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> update_child(scrollbar);
+  }
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (hscrollbar.visible()) {
+    hscrollbar.damage_resize(
+	X, scrollbar.align()&amp;FL_ALIGN_TOP ? Y-scrollbar_width_ : Y+H,
+	W, scrollbar_width_);
+    hscrollbar.value(hposition_, W, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, full_width_);
+    hscrollbar.linesize(dy);
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (drawsquare) draw_child(hscrollbar);
+    </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> update_child(hscrollbar);
+  }
+
+  </span><span class="cpp1-comment">// draw that little square between the scrollbars:
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (drawsquare &amp;&amp; scrollbar.visible() &amp;&amp; hscrollbar.visible()) {
+    fl_color(parent()-&gt;color());
+    fl_rectf(scrollbar.x(), hscrollbar.y(), scrollbar_width_,scrollbar_width_);
+  }
+
+  real_hposition_ = hposition_;
+}
+
+
+</span><span class="cpp1-comment">// intializing everything:
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::new_list() 
+{
+  top_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  position_ = real_position_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  hposition_ = real_hposition_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  selection_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  offset_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  max_width = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  max_width_item = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  redraw_lines();
+}
+
+
+</span><span class="cpp1-comment">// Replace an Item by another
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::replacing(Fl_Ext_TreeItem* a, Fl_Ext_TreeItem* b) 
+{
+  redraw_line(a);
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (a == selection_) 
+     selection_ = b;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (a == top_) 
+     top_ = b;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (a == max_width_item) 
+  {
+        max_width_item = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+         max_width = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  }
+}
+
+</span><span class="cpp1-comment">// find item under mouse!
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem* Fl_Ext_TreeBrowser::find_item(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> my)
+{
+  update_top();
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> X, Y, W, H; 
+  bbox(X, Y, W, H);
+  Fl_Ext_TreeItem* l;
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> yy = Y-offset_;
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (l = top_; l; l = item_next(l)) 
+  {
+    </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> hh = item_height(l); 
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (hh &lt;= </span><span class="cpp1-number">0</span><span class="cpp1-symbol">) </span><span class="cpp1-reservedword">continue</span><span class="cpp1-symbol">;
+    yy += hh;
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (my &lt;= yy || yy&gt;=(Y+H)) 
+      </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> l;
+  }
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+}
+
+</span><span class="cpp1-comment">// Select function
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::select(Fl_Ext_TreeItem* l, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> i, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> docallbacks) 
+{
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (type() == FL_MULTI_BROWSER) 
+  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (selection_ != l) 
+    {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (selection_) 
+        redraw_line(selection_);
+      selection_ = l;
+      redraw_line(l);
+    }
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> ((!i)==(!item_selected(l))) 
+       </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    item_select(l, i);
+    redraw_line(l);
+  } </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (i &amp;&amp; selection_ == l) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!i &amp;&amp; selection_ != l) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (selection_) 
+    {
+      item_select(selection_, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+      redraw_line(selection_);
+      selection_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    }
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (i) {
+      item_select(l, </span><span class="cpp1-number">1</span><span class="cpp1-symbol">);
+      selection_ = l;
+      redraw_line(l);
+      display(l);
+    }
+  }	    
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (docallbacks) {
+    set_changed();
+    do_callback();
+  }
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+}
+
+</span><span class="cpp1-comment">// Deselect 
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::deselect(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> docallbacks) 
+{
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (type() == FL_MULTI_BROWSER) 
+  {
+    </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> change = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    
+    </span><span class="cpp1-comment">// ama la hala dachet 
+</span><span class="cpp1-space">    Fl_Ext_TreeItem* p=item_first();
+    </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> (p)
+     {
+         change |= select(p, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, docallbacks);
+         p=p-&gt;m_pNext;
+     }
+    </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (Fl_Ext_TreeItem* p = item_first(); p; p = item_next(p))
+             change |= select(p, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, docallbacks);
+         
+    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> change;
+  } 
+  </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+  {
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!selection_) 
+      </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    item_select(selection_, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+    redraw_line(selection_);
+    selection_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+  }
+}
+</span><span class="cpp1-comment">// Select the item or change the status of the item from 1 &lt;--&gt; 0 Mariwan
+/// Check this if it is nessesary .. Mariwan ******
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::select_only(Fl_Ext_TreeItem* l, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> docallbacks) 
+{
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!l) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> deselect(docallbacks);
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> change = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (type() == FL_MULTI_BROWSER) 
+  {
+    </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (Fl_Ext_TreeItem* p = item_first(); p; p = item_next(p))
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (p != l) 
+         change |= select(p, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, docallbacks);
+  }
+  change |= select(l, </span><span class="cpp1-number">1</span><span class="cpp1-symbol">, docallbacks);
+  display(l);
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> change;
+}
+
+
+
+</span><span class="cpp1-comment">/////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::handle(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> event) 
+{
+ 
+  </span><span class="cpp1-comment">// must do shortcuts first or the scrollbar will get them...
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (event == FL_ENTER || event == FL_LEAVE) 
+    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (event == FL_KEYBOARD &amp;&amp; type() &gt;= FL_HOLD_BROWSER) 
+   {
+    Fl_Ext_TreeItem* l1 = selection_;
+    Fl_Ext_TreeItem* l = l1; 
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!l) l = top_; 
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!l) l = item_first();
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l) 
+       {
+      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (type()==FL_HOLD_BROWSER) 
+         </span><span class="cpp1-reservedword">switch</span><span class="cpp1-space"> (Fl::event_key()) 
+         {
+           </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_Down:
+	                          </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> ((l = item_next(l)))
+	                          </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (item_height(l)&gt;</span><span class="cpp1-number">0</span><span class="cpp1-symbol">) 
+                              {
+                                select_only(l, </span><span class="cpp1-number">1</span><span class="cpp1-symbol">);
+                                </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+                              }
+	                          </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+           </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_Up:
+	                          </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> ((l = item_prev(l))) </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (item_height(l)&gt;</span><span class="cpp1-number">0</span><span class="cpp1-symbol">) 
+                              {
+	                             select_only(l, </span><span class="cpp1-number">1</span><span class="cpp1-symbol">); 
+                                 </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+                               }
+	                           </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+         } 
+         </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+          </span><span class="cpp1-reservedword">switch</span><span class="cpp1-space"> (Fl::event_key()) 
+          {
+           </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_Enter:
+           </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_KP_Enter:
+	                               select_only(l, </span><span class="cpp1-number">1</span><span class="cpp1-symbol">);
+	                               </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+            </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> ' ':
+	                               selection_ = l;
+                                   select(l, !item_selected(l), </span><span class="cpp1-number">1</span><span class="cpp1-symbol">);
+	                               </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+            </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_Down:
+	                               </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> ((l = item_next(l))) 
+                                   {
+	                                 </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (Fl::event_state(FL_SHIFT|FL_CTRL))
+	                                   select(l, l1 ? item_selected(l1) : </span><span class="cpp1-number">1</span><span class="cpp1-symbol">, </span><span class="cpp1-number">1</span><span class="cpp1-symbol">);
+	                                 </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (item_height(l)&gt;</span><span class="cpp1-number">0</span><span class="cpp1-symbol">) </span><span class="cpp1-reservedword">goto</span><span class="cpp1-space"> J1;
+	                               }
+	                               </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+            </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_Up:
+	                               </span><span class="cpp1-reservedword">while</span><span class="cpp1-space"> ((l = item_prev(l))) 
+                                   {
+	                                 </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (Fl::event_state(FL_SHIFT|FL_CTRL))
+	                                   select(l, l1 ? item_selected(l1) : </span><span class="cpp1-number">1</span><span class="cpp1-symbol">, </span><span class="cpp1-number">1</span><span class="cpp1-symbol">);
+	                                 </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (item_height(l)&gt;</span><span class="cpp1-number">0</span><span class="cpp1-symbol">) 
+                                       </span><span class="cpp1-reservedword">goto</span><span class="cpp1-space"> J1;
+	                               }
+	                               </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+                           J1:
+	                               </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (selection_) 
+                                      redraw_line(selection_);
+	                                  selection_ = l; 
+                                      redraw_line(l);
+	                                  display(l);
+	                                  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+          }
+        }
+     }
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (Fl_Group::handle(event)) 
+     </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> X, Y, W, H, button;
+  Fl_Ext_TreeItem *pItem; </span><span class="cpp1-comment">// THIS IS the change of the old event .. 
+</span><span class="cpp1-space">  bbox(X, Y, W, H);
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> my;
+  </span><span class="cpp1-reservedword">static</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> change;
+  </span><span class="cpp1-reservedword">static</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> whichway;
+  </span><span class="cpp1-reservedword">static</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> py;
+  </span><span class="cpp1-reservedword">switch</span><span class="cpp1-space"> (event) 
+    {
+       </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_PUSH:
+                       </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!Fl::event_inside(X, Y, W, H))  </span><span class="cpp1-comment">// thi click was not in the widget
+</span><span class="cpp1-space">                             </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+                       </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (Fl::visible_focus()) 
+                           Fl::focus(</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">);
+                       my = py = Fl::event_y();
+                       change = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+                         X = Fl::event_x();
+                         Y = Fl::event_y();
+                       </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (type() == FL_NORMAL_BROWSER || !top_)
+                        { </span><span class="cpp1-comment">// start of change  mariwan  2005-05-07
+</span><span class="cpp1-space">                                  ; </span><span class="cpp1-comment">// do nothing 
+</span><span class="cpp1-space">                        </span><span class="cpp1-comment">// just open or close the branch
+</span><span class="cpp1-space">                        
+                            pItem = find_item(Y);
+                            </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!pItem) </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+                             button = Fl::event_button(); </span><span class="cpp1-comment">// Get the kind of the click
+</span><span class="cpp1-space">                            </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(Fl::event_clicks()) </span><span class="cpp1-comment">// if it is double click 
+</span><span class="cpp1-space">                            {
+                              HandleInvoke(pItem);
+                            }
+                            </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> </span><span class="cpp1-comment">// or if it is right click 
+</span><span class="cpp1-space">                              </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(button == FL_RIGHT_MOUSE)
+                            {
+                              HandleMenu(pItem-&gt;m_pData);
+                            }
+                            </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> </span><span class="cpp1-comment">// or if it is left click 
+</span><span class="cpp1-space">                              </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(button == FL_LEFT_MOUSE)
+                               {
+                                </span><span class="cpp1-comment">// hide/show                       // +4 added by Mariwan
+</span><span class="cpp1-space">                                </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;IsParent() &amp;&amp; (X &gt; (pItem-&gt;m_nLevel*</span><span class="cpp1-number">10</span><span class="cpp1-symbol">+</span><span class="cpp1-number">3</span><span class="cpp1-symbol">+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">)) &amp;&amp; (X &lt;= (pItem-&gt;m_nLevel*</span><span class="cpp1-number">10</span><span class="cpp1-symbol">+</span><span class="cpp1-number">13</span><span class="cpp1-symbol">+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">)) )
+                                 {
+                                   </span><span class="cpp1-comment">// Change the status of the Item by inverting the IsOpen status
+</span><span class="cpp1-space">                                  pItem-&gt;SetBranchVisible(!pItem-&gt;IsOpen());
+                                  HandleSelect(pItem,</span><span class="cpp1-number">1</span><span class="cpp1-symbol">);
+                                  redraw();
+                                 }
+                               }
+                        }
+                               
+                       </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">                        </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (type() != FL_MULTI_BROWSER) 
+                          {
+                              
+                        </span><span class="cpp1-comment">//  open or close the branch
+</span><span class="cpp1-space">                            pItem = find_item(Y);
+                            </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!pItem) 
+                              </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+                           
+                            </span><span class="cpp1-comment">// ama dabet chak bikret halaya.. 
+</span><span class="cpp1-space">                             button = Fl::event_button(); </span><span class="cpp1-comment">// Get the kind of the click
+</span><span class="cpp1-space">                            </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(Fl::event_clicks()) </span><span class="cpp1-comment">// if it is double click 
+</span><span class="cpp1-space">                            {
+                              HandleInvoke(pItem);  </span><span class="cpp1-comment">// Double click has been occured
+</span><span class="cpp1-space">                            }
+                            </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> </span><span class="cpp1-comment">// or if it is right click 
+</span><span class="cpp1-space">                              </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(button == FL_RIGHT_MOUSE)
+                            {
+                              HandleMenu(pItem-&gt;m_pData);
+                            }
+                            </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> </span><span class="cpp1-comment">// or if it is left click 
+</span><span class="cpp1-space">                              </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(button == FL_LEFT_MOUSE)
+                               {
+                                </span><span class="cpp1-comment">// hide/show                       // +4 added by Mariwan
+</span><span class="cpp1-space">                                </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;IsParent() &amp;&amp; (X &gt; (pItem-&gt;m_nLevel*</span><span class="cpp1-number">10</span><span class="cpp1-symbol">+</span><span class="cpp1-number">3</span><span class="cpp1-symbol">+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">)) &amp;&amp; (X &lt;= (pItem-&gt;m_nLevel*</span><span class="cpp1-number">10</span><span class="cpp1-symbol">+</span><span class="cpp1-number">13</span><span class="cpp1-symbol">+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">)) )
+                                 {
+                                   </span><span class="cpp1-comment">// Change the status of the Item by inverting the IsOpen status
+</span><span class="cpp1-space">                                  pItem-&gt;SetBranchVisible(!pItem-&gt;IsOpen());
+                                  HandleSelect(pItem,</span><span class="cpp1-number">1</span><span class="cpp1-symbol">);
+                                  redraw();
+                                 }
+                                 </span><span class="cpp1-reservedword">else
+</span><span class="cpp1-space">                                 {  
+                                   change = select_only(pItem, when() &amp; FL_WHEN_CHANGED); </span><span class="cpp1-comment">// take action just in case the click is not open close
+</span><span class="cpp1-space">                                   HandleSelect(pItem,</span><span class="cpp1-number">1</span><span class="cpp1-symbol">); </span><span class="cpp1-comment">// added by Mariwan 2006-06-19  Note: this should be further checked if it needs to send 1 or 0 with the HandleSelect
+</span><span class="cpp1-space">                                  }
+                               }
+                            
+                          } 
+                           </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+                            {
+                               Fl_Ext_TreeItem* l = find_item(my);
+                               whichway = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+                              
+                              {  </span><span class="cpp1-comment">// first do the open close branch 
+</span><span class="cpp1-space">                                
+                               pItem = find_item(Y);
+                               </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!pItem) 
+                                  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+                                </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(!Select(pItem)) 
+                                    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+                               </span><span class="cpp1-comment">// hide/show                       // +4 added by Mariwan
+</span><span class="cpp1-space">                              </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(pItem-&gt;IsParent() &amp;&amp; (X &gt; (pItem-&gt;m_nLevel*</span><span class="cpp1-number">10</span><span class="cpp1-symbol">+</span><span class="cpp1-number">3</span><span class="cpp1-symbol">+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">)) &amp;&amp; (X &lt;= (pItem-&gt;m_nLevel*</span><span class="cpp1-number">10</span><span class="cpp1-symbol">+</span><span class="cpp1-number">13</span><span class="cpp1-symbol">+</span><span class="cpp1-number">4</span><span class="cpp1-symbol">)) )
+                               {
+                                 </span><span class="cpp1-comment">// Change the status of the Item by inverting the IsOpen status
+</span><span class="cpp1-space">                                 pItem-&gt;SetBranchVisible(!pItem-&gt;IsOpen());
+                                 redraw();
+                               }
+
+                               </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(Fl::event_clicks())
+                               {
+                                 HandleInvoke(pItem);
+                               }
+                               </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+                                  </span><span class="cpp1-reservedword">if</span><span class="cpp1-symbol">(button == FL_RIGHT_MOUSE)
+                                   {
+                                   HandleMenu(pItem-&gt;m_pData);
+                                   }
+                               } </span><span class="cpp1-comment">// end of open - close branch
+</span><span class="cpp1-space">                               </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (Fl::event_state(FL_CTRL)) 
+                                 { </span><span class="cpp1-comment">// toggle selection:
+</span><span class="cpp1-space">                       TOGGLE:
+	                                </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l) 
+                                      {
+	                                       whichway = !item_selected(l);
+	                                       change = select(l, whichway, when() &amp; FL_WHEN_CHANGED);
+	                                  }
+                                 } 
+                               </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+                                 </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (Fl::event_state(FL_SHIFT)) 
+                                   { </span><span class="cpp1-comment">// extend selection:
+</span><span class="cpp1-space">	                                 </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l == selection_) 
+                                       </span><span class="cpp1-reservedword">goto</span><span class="cpp1-space"> TOGGLE;
+	                                 </span><span class="cpp1-comment">// state of previous selection determines new value:
+</span><span class="cpp1-space">	                                 whichway = l ? !item_selected(l) : </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+	                                 </span><span class="cpp1-comment">// see which of the new item or previous selection is earlier,
+</span><span class="cpp1-space">	                                 </span><span class="cpp1-comment">// by searching from the previous forward for this one:
+</span><span class="cpp1-space">	                                 </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> down;
+	                                 </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!l) down = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+	                                 </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+                                     {
+                                       </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (Fl_Ext_TreeItem* m = selection_; ; m = item_next(m)) 
+                                        {
+	                                    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (m == l) 
+                                          {
+                                              down = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+                                              </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+                                          }
+                                        </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!m) 
+                                          {
+                                            down = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+                                            </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+                                          }
+	                                      }
+                                     }
+	                                 </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (down) 
+                                       {
+	                                     </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (Fl_Ext_TreeItem* m = selection_; m != l; m = item_next(m))
+	                                      select(m, whichway, when() &amp; FL_WHEN_CHANGED);
+	                                   } 
+                                       </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+                                       {
+	                                     Fl_Ext_TreeItem* e = selection_;
+	                                     </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (Fl_Ext_TreeItem* m = item_next(l); m; m = item_next(m)) 
+                                          {
+	                                         select(m, whichway, when() &amp; FL_WHEN_CHANGED);
+	                                         </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (m == e) 
+                                               </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;
+	                                      }
+	                                    }
+	                                  </span><span class="cpp1-comment">// do the clicked item last so the select box is around it:
+</span><span class="cpp1-space">	                                  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l) 
+                                         select(l, whichway, when() &amp; FL_WHEN_CHANGED);
+	                                  change = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+                                      }
+                                      </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+                                      { </span><span class="cpp1-comment">// select only this item
+
+</span><span class="cpp1-space">	                                    change = select_only(l, when() &amp; FL_WHEN_CHANGED);
+                                      }
+                               }
+                               </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+       </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_DRAG:
+                          </span><span class="cpp1-comment">// do the scrolling first:
+</span><span class="cpp1-space">                          my = Fl::event_y();
+                          </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (my &lt; Y &amp;&amp; my &lt; py) 
+                          {
+                            </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> p = real_position_+my-Y;
+                            </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (p&lt;</span><span class="cpp1-number">0</span><span class="cpp1-symbol">) 
+                               p = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+                               position(p);
+                           } 
+                           </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+                             </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (my &gt; (Y+H) &amp;&amp; my &gt; py) 
+                              {
+                                </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> p = real_position_+my-(Y+H);
+                                </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> hh = full_height()-H;
+                                </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (p &gt; hh) 
+                                   p = hh;
+                                </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (p&lt;</span><span class="cpp1-number">0</span><span class="cpp1-symbol">) p = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+                                position(p);
+                               }
+                             </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (type() == FL_NORMAL_BROWSER || !top_)
+                                ;
+                                </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+                                  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (type() == FL_MULTI_BROWSER) 
+                                 {
+                                   Fl_Ext_TreeItem* l = find_item(my);
+                                   Fl_Ext_TreeItem* t; 
+                                   Fl_Ext_TreeItem* b; </span><span class="cpp1-comment">// this will be the range to change
+</span><span class="cpp1-space">                                   </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (my &gt; py) 
+                                    { </span><span class="cpp1-comment">// go down
+</span><span class="cpp1-space">	                                   t = selection_ ? item_next(selection_) : </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+	                                   b = l ? item_next(l) : </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+                                    } 
+                                      </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+                                     {	</span><span class="cpp1-comment">// go up
+</span><span class="cpp1-space">	                                    t = l;
+	                                    b = selection_;
+                                     }
+                                    </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (; t &amp;&amp; t != b; t = item_next(t))
+	                                change |= select(t, whichway, when() &amp; FL_WHEN_CHANGED);
+                                    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l) 
+                                      selection_ = l;
+                                 } 
+                                 </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+                                 {
+                                   Fl_Ext_TreeItem* l1 = selection_;
+                                   Fl_Ext_TreeItem* l = (Fl::event_x()&lt;x() || Fl::event_x()&gt;x()+w()) ? selection_ :	find_item(my);
+                                   select_only(l, when() &amp; FL_WHEN_CHANGED);
+                                   change = (l != l1);
+                                 }
+                                 py = my;
+                                 </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+       </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_RELEASE:
+                                 </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (type() == FL_SELECT_BROWSER) 
+                                 {
+                                    Fl_Ext_TreeItem* t = selection_; 
+                                    deselect(); 
+                                    selection_ = t; 
+                                  }
+                                  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (change) 
+                                  {
+                                    set_changed();
+                                    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (when() &amp; FL_WHEN_RELEASE) 
+                                      do_callback();
+                                   } 
+                                   </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+                                    {
+                                      </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (when() &amp; FL_WHEN_NOT_CHANGED) do_callback();
+                                    }
+                                    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+
+       </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_FOCUS:
+       </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_UNFOCUS:
+                                    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (type() &gt;= FL_HOLD_BROWSER &amp;&amp; Fl::visible_focus()) 
+                                     {
+                                        redraw();
+                                        </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">1</span><span class="cpp1-symbol">;
+                                      } 
+                                     </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+                                       </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+       }
+
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+}
+
+
+</span><span class="cpp1-comment">// Default versions of some of the virtual functions:
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::item_quick_height(Fl_Ext_TreeItem* l)  {
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> item_height(l);
+}
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::incr_height()  
+{
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> item_quick_height(item_first());
+}
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::full_height()  
+{
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> t = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  </span><span class="cpp1-reservedword">for</span><span class="cpp1-space"> (Fl_Ext_TreeItem* p = item_first(); p; p = item_next(p))
+    t += item_quick_height(p);
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> t;
+}
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::full_width()  
+{
+  </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> max_width;
+}
+
+</span><span class="cpp1-comment">// select or deselect depending on the status 1 is select 0 is deselect
+</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::item_select(Fl_Ext_TreeItem* l, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> status) 
+{
+l-&gt;m_bSelected=status;
+</span><span class="cpp1-reservedword">return</span><span class="cpp1-symbol">;
+}
+
+</span><span class="cpp1-comment">// Return itmes condition if selected 1 else 0
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::item_selected(Fl_Ext_TreeItem* l) </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> 
+{
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (l)
+    {
+       </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> l-&gt;m_bSelected;
+    }
+     </span><span class="cpp1-reservedword">else</span><span class="cpp1-space"> 
+      </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+}
+
+
+</span><span class="cpp1-comment">/////////////////////////////////////////////////////////////////////
+// constructor
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-identifier">Fl_Ext_TreeBrowser::Fl_Ext_TreeBrowser(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> X, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Y, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> W, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> H, </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *l </span><span class="cpp1-comment">/* =0 */</span><span class="cpp1-symbol">): Fl_Group(X, Y, W, H, l), 
+                     scrollbar(</span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">), </span><span class="cpp1-comment">// they will be resized by draw()
+</span><span class="cpp1-space">                     hscrollbar(</span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">, </span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+{
+  box(FL_NO_BOX);
+  align(FL_ALIGN_BOTTOM);
+  position_ = real_position_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  hposition_ = real_hposition_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  offset_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  top_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  when(FL_WHEN_RELEASE_ALWAYS);
+  selection_ = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  color(FL_BACKGROUND2_COLOR, FL_SELECTION_COLOR);
+  scrollbar.callback(scrollbar_callback);
+  scrollbar.align(FL_ALIGN_LEFT|FL_ALIGN_BOTTOM); </span><span class="cpp1-comment">// back compatability?
+</span><span class="cpp1-space">  hscrollbar.callback(hscrollbar_callback);
+  hscrollbar.type(FL_HORIZONTAL);
+  textfont_ = FL_HELVETICA;
+  textsize_ = (uchar)FL_NORMAL_SIZE;
+  textcolor_ = FL_FOREGROUND_COLOR;
+  has_scrollbar_ = BOTH;
+  max_width = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  max_width_item = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  redraw1 = redraw2 = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+  type(FL_SELECT_BROWSER);
+  end();
+  </span><span class="cpp1-comment">// Fl_ext_Tree origional 
+</span><span class="cpp1-space">  scrollbar_right() ;    </span><span class="cpp1-comment">// by Mariwan to let the scroolbar be in the right side (should)
+</span><span class="cpp1-space">  when(FL_WHEN_RELEASE);
+  Fl_Widget::callback(_s_DefaultCallback);
+  m_pFirst = m_pLast = NULL;
+
+}
+
+
+Fl_Ext_TreeBrowser::~Fl_Ext_TreeBrowser()
+{
+  _Remove(NULL, </span><span class="cpp1-number">1</span><span class="cpp1-symbol">); </span><span class="cpp1-comment">// Erase everything
+</span><span class="cpp1-symbol">}
+
+</span><span class="cpp1-comment">// Adding Item to the tree 
+</span><span class="cpp1-identifier">Fl_Ext_TreeItem* Fl_Ext_TreeBrowser::add_item(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nLevel, </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *label, uchar x, Fl_Ext_TreeItem* pItemBase)         
+{
+  Fl_Ext_TreeItem *pTreeItem = </span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Ext_TreeItem;
+
+  pTreeItem-&gt;m_nLevel = nLevel;
+  pTreeItem-&gt;m_pData = strdup(label);
+  pTreeItem-&gt;m_pPrev=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">; </span><span class="cpp1-comment">//avoiding undefined link
+</span><span class="cpp1-space">  pTreeItem-&gt;m_pNext=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;  </span><span class="cpp1-comment">//avoiding undefined link
+</span><span class="cpp1-space">  pTreeItem-&gt;type(x);
+  
+       
+    </span><span class="cpp1-reservedword">switch</span><span class="cpp1-space"> (pTreeItem-&gt;type())
+    { </span><span class="cpp1-comment">// Decide wich picture will be drawn near to the text
+</span><span class="cpp1-space">      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_NOPICTURE     :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}  
+      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_DESKTOP       :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(desktop_xpm); </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}
+      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_HOME          :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(home_xpm);    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}
+      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_FLOPPY        :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(floppy_unmount_xpm);    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}
+      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_HARDDISK      :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(harddisk_xpm);    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}
+      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_CDROM         :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(cdrom_unmount_xpm);    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}
+      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_FOLDER        :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(Folder_xpm);          </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">; }
+      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_FOLDERCLOSED  :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(Folder_xpm);    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}
+      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_FOLDEROPEN    :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(FolderOpened_xpm);    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}
+      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_REMOTHARDDISK :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(harddisk_xpm);    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}
+      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_NETWORK       :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(network_xpm);    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}
+      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_CONTROLPANNEL :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(control_panel_xpm);    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}
+      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_RECYCLEEMPTY  :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(trashcan_empty_xpm);    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}
+      </span><span class="cpp1-reservedword">case</span><span class="cpp1-space"> FL_TREE_ITEM_RECYCLEFULL   :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(trashcan_full_xpm);    </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">;}
+      </span><span class="cpp1-reservedword">default</span><span class="cpp1-space">                         :         {pTreeItem-&gt;m_PixmapPicture=</span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Pixmap(Folder_xpm);          </span><span class="cpp1-reservedword">break</span><span class="cpp1-symbol">; }
+    }          
+
+</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> Fl_Ext_TreeBrowser::Add( pItemBase,  pTreeItem,</span><span class="cpp1-number">0</span><span class="cpp1-space"> ); </span><span class="cpp1-comment">//Add this item to the tree do not select it 
+</span><span class="cpp1-symbol">};
+</span></span>
+</code></pre>
+</body>
+</html>

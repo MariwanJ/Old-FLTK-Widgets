@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>fl_ext_tree_browser_h.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #3366FF; font-weight: bold; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #4CCC4C; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+// Fl_Ext_TreeBrowser.h  v 0.0.1                              2006-06-19 
+//
+//         for the Fast Light Tool Kit (FLTK) 1.1.x .
+//
+// Copyright 1998-2003 by Mariwan Jalal, Don Zimmer, Bill Spitzak   &amp; others.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Library General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Library General Public License for more details.
+//
+// You should have received a copy of the GNU Library General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+// USA.
+//
+// Please report all bugs and problems to &quot;fltk_kurdi@yahoo.com&quot;.
+//
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+
+</span><span class="cpp1-preprocessor">#ifndef FL_EXT_TREE_BROWSER_H
+#define FL_EXT_TREE_BROWSER_H
+#ifndef Fl_Group_H
+#include &quot;FL/Fl_Group.H&quot;
+#endif
+#include &lt;FL/Fl_Scrollbar.H&gt;
+
+#define FL_NORMAL_BROWSER	0
+#define FL_SELECT_BROWSER	1
+#define FL_HOLD_BROWSER		2
+#define FL_MULTI_BROWSER	3
+
+
+#include &quot;fl_ext_tree_item.h&quot;
+
+
+</span><span class="cpp1-reservedword">class</span><span class="cpp1-space"> Fl_Ext_TreeBrowser : </span><span class="cpp1-reservedword">public</span><span class="cpp1-space"> Fl_Group
+{
+</span><span class="cpp1-reservedword">private</span><span class="cpp1-symbol">:    
+
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> position_;	</span><span class="cpp1-comment">// where user wants it scrolled to
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> real_position_;	</span><span class="cpp1-comment">// the current vertical scrolling position
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> hposition_;	</span><span class="cpp1-comment">// where user wants it panned to
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> real_hposition_;	</span><span class="cpp1-comment">// the current horizontal scrolling position
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> offset_;		</span><span class="cpp1-comment">// how far down top_ item the real_position is
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> max_width;	</span><span class="cpp1-comment">// widest object seen so far
+</span><span class="cpp1-space">  uchar has_scrollbar_;	</span><span class="cpp1-comment">// which scrollbars are enabled
+</span><span class="cpp1-space">  uchar textfont_, textsize_;
+  </span><span class="cpp1-reservedword">unsigned</span><span class="cpp1-space"> textcolor_;
+  
+  Fl_Ext_TreeItem* top_;		</span><span class="cpp1-comment">// which item scrolling position is in
+</span><span class="cpp1-space">  Fl_Ext_TreeItem* selection_;	</span><span class="cpp1-comment">// which is selected (except for FL_MULTI_BROWSER)
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *redraw1,*redraw2; </span><span class="cpp1-comment">// minimal update pointers
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">* max_width_item;	</span><span class="cpp1-comment">// which item has max_width_
+
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">static</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> scrollbar_width_;
+
+  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> update_top();
+  
+</span><span class="cpp1-reservedword">protected</span><span class="cpp1-symbol">:
+   
+  </span><span class="cpp1-comment">// All of the following must be supplied by the subclass:
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> item_quick_height(Fl_Ext_TreeItem *)  ;
+
+ </span><span class="cpp1-comment">// virtual void item_draw(void *,int,int,int,int) const = 0;
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">// you don't have to provide these but it may help speed it up:
+
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> full_width()  ;	</span><span class="cpp1-comment">// current width of all items
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> full_height() ;	</span><span class="cpp1-comment">// current height of all items
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> incr_height() ;	</span><span class="cpp1-comment">// average height of an item
+
+</span><span class="cpp1-space">  </span><span class="cpp1-comment">// These only need to be done by subclass if you want a multi-browser:
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> item_select(Fl_Ext_TreeItem *,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">);
+  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> item_selected(Fl_Ext_TreeItem *) </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> ;
+
+  </span><span class="cpp1-comment">// things the subclass may want to call:
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *top()  {</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> top_;}
+  Fl_Ext_TreeItem **selection() {</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> &amp;selection_;}
+
+  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> new_list(); </span><span class="cpp1-comment">// completely clobber all data, as though list replaced
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> deleting(Fl_Ext_TreeItem *a); </span><span class="cpp1-comment">// get rid of any pointers to a
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> replacing(Fl_Ext_TreeItem *a,Fl_Ext_TreeItem *b); </span><span class="cpp1-comment">// change a pointers to b
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> displayed(Fl_Ext_TreeItem *) ; </span><span class="cpp1-comment">// true if this line is visible
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> redraw_line(Fl_Ext_TreeItem *); </span><span class="cpp1-comment">// minimal update, no change in size
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> redraw_lines() {damage(FL_DAMAGE_SCROLL);} </span><span class="cpp1-comment">// redraw all of them
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> bbox(</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">&amp;,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">&amp;,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">&amp;,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">&amp;) </span><span class="cpp1-reservedword">const</span><span class="cpp1-symbol">;
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> leftedge() </span><span class="cpp1-reservedword">const</span><span class="cpp1-symbol">;	</span><span class="cpp1-comment">// x position after scrollbar &amp; border
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *find_item(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> my); </span><span class="cpp1-comment">// item under mouse
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> draw(</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">);
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> handle(</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">);
+  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> draw();
+  
+</span><span class="cpp1-reservedword">public</span><span class="cpp1-symbol">:
+
+</span><span class="cpp1-comment">// User Callbacks      
+</span><span class="cpp1-space">   </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">   HandleInvoke(Fl_Ext_TreeItem *ItemSquareClicked);              </span><span class="cpp1-comment">// A Callback function pointer left for the user :  Clicked + or - callback 
+</span><span class="cpp1-space">   </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">   HandleMenu(</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *pData);       
+   </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">   HandleSelect(Fl_Ext_TreeItem* pData, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bState);
+
+   </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> SetLastItem(Fl_Ext_TreeItem*); </span><span class="cpp1-comment">/// change the plast select item .. so we can add under the new item
+</span><span class="cpp1-space">   </span><span class="cpp1-reservedword">int</span><span class="cpp1-space">  cb_GetGrey(Fl_Ext_TreeItem *ItemToget);    </span><span class="cpp1-comment">// A Callback function pointer left for the user : 
+
+</span><span class="cpp1-space">  Fl_Ext_TreeBrowser(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> x, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> y, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> w, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> h, </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *l=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> ~Fl_Ext_TreeBrowser();
+  
+  Fl_Scrollbar scrollbar;		</span><span class="cpp1-comment">// Vertical scrollbar
+</span><span class="cpp1-space">  Fl_Scrollbar hscrollbar;		</span><span class="cpp1-comment">// Horizontal scrollbar
+</span><span class="cpp1-space">  
+  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> resize(</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">);
+
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> select(Fl_Ext_TreeItem *,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">=</span><span class="cpp1-number">1</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> docallbacks=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> select_only(Fl_Ext_TreeItem *,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> docallbacks=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> deselect(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> docallbacks=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> position() </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> {</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> position_;}
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> hposition() </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> {</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> hposition_;}
+  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> position(</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">); </span><span class="cpp1-comment">// scroll to here
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> hposition(</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">); </span><span class="cpp1-comment">// pan to here
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> display(Fl_Ext_TreeItem*); </span><span class="cpp1-comment">// scroll so this item is shown
+
+</span><span class="cpp1-space">  uchar has_scrollbar() </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> {</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> has_scrollbar_;}
+  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> has_scrollbar(uchar i) {has_scrollbar_ = i;}
+  </span><span class="cpp1-reservedword">enum</span><span class="cpp1-space"> { </span><span class="cpp1-comment">// values for has_scrollbar()
+</span><span class="cpp1-space">    HORIZONTAL = </span><span class="cpp1-number">1</span><span class="cpp1-symbol">,
+    VERTICAL = </span><span class="cpp1-number">2</span><span class="cpp1-symbol">,
+    BOTH = </span><span class="cpp1-number">3</span><span class="cpp1-symbol">,
+    ALWAYS_ON = </span><span class="cpp1-number">4</span><span class="cpp1-symbol">,
+    HORIZONTAL_ALWAYS = </span><span class="cpp1-number">5</span><span class="cpp1-symbol">,
+    VERTICAL_ALWAYS = </span><span class="cpp1-number">6</span><span class="cpp1-symbol">,
+    BOTH_ALWAYS = </span><span class="cpp1-number">7
+</span><span class="cpp1-space">  };
+
+  Fl_Font textfont() </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> {</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> (Fl_Font)textfont_;}
+  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> textfont(uchar s) {textfont_ = s;}
+  uchar textsize() </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> {</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> textsize_;}
+  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> textsize(uchar s) {textsize_ = s;}
+  Fl_Color textcolor() </span><span class="cpp1-reservedword">const</span><span class="cpp1-space"> {</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> (Fl_Color)textcolor_;}
+  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> textcolor(</span><span class="cpp1-reservedword">unsigned</span><span class="cpp1-space"> n) {textcolor_ = n;}
+
+  </span><span class="cpp1-reservedword">static</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> scrollbar_width(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> b) {scrollbar_width_ = b;}
+  </span><span class="cpp1-reservedword">static</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> scrollbar_width() {</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> scrollbar_width_;}
+
+  </span><span class="cpp1-comment">// for back compatability:
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> scrollbar_right() {scrollbar.align(FL_ALIGN_RIGHT);}
+  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> scrollbar_left() {scrollbar.align(FL_ALIGN_LEFT);}
+  
+
+        </span><span class="cpp1-comment">//Add Item                                                         /* Add after this item*/ 
+</span><span class="cpp1-space">     </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> Fl_Ext_TreeItem*  add_item(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nLevel, </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *label, uchar ItemType, Fl_Ext_TreeItem* ); </span><span class="cpp1-comment">//by mariwan
+
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> clear();
+
+  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> Fl_Ext_TreeItem *item_first();
+  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> Fl_Ext_TreeItem *item_last();
+  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> Fl_Ext_TreeItem *item_next(Fl_Ext_TreeItem *);
+  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> Fl_Ext_TreeItem *item_prev(Fl_Ext_TreeItem *);
+  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> item_width(Fl_Ext_TreeItem *) ;
+  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> item_height(Fl_Ext_TreeItem *) ;
+  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> item_draw(Fl_Ext_TreeItem *,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">) ;
+  </span><span class="cpp1-reservedword">virtual</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> handle(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> event);
+
+  </span><span class="cpp1-comment">// add item 
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Add(Fl_Ext_TreeItem *pItem, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bSelect=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+  
+  </span><span class="cpp1-comment">// Add after the pItemBase the pItemNew item ... return the added items pointer
+</span><span class="cpp1-space">  Fl_Ext_TreeItem* Fl_Ext_TreeBrowser::Add(Fl_Ext_TreeItem *pItemBase, Fl_Ext_TreeItem* pItemNew, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bSelect );
+
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Remove(Fl_Ext_TreeItem *pItem);
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Prune(Fl_Ext_TreeItem *pItem);
+  
+  </span><span class="cpp1-comment">// This could be negelected ... do not depend on this .. it call add with base item
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> InsertAfter(Fl_Ext_TreeItem *pPrev, Fl_Ext_TreeItem *pItem, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bSelect = </span><span class="cpp1-number">0</span><span class="cpp1-symbol">);
+
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Select(Fl_Ext_TreeItem *pItem);
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> Select(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nLine);
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> SelectLast(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> nLevel);
+
+
+  Fl_Ext_TreeItem *Selection(</span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">) ;
+
+  Fl_Ext_TreeItem *Find(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> (*pFunc)(</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *a, </span><span class="cpp1-reservedword">void</span><span class="cpp1-symbol">*b), </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *pArg); </span><span class="cpp1-comment">// this should be virtual as it needs to be 
+</span><span class="cpp1-space">                                                                             </span><span class="cpp1-comment">//re-written when the way of building of the tree is changed
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">static</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> _s_DefaultFindFunc(</span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *a, </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *b);
+
+  </span><span class="cpp1-comment">// default do-nothing callback, user template
+</span><span class="cpp1-space">  </span><span class="cpp1-reservedword">static</span><span class="cpp1-space"> </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> _s_DefaultCallback(Fl_Widget *, </span><span class="cpp1-reservedword">void</span><span class="cpp1-space"> *);
+
+</span><span class="cpp1-reservedword">private</span><span class="cpp1-symbol">:
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> _Remove(Fl_Ext_TreeItem *pItem, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bFree); </span><span class="cpp1-comment">// return 1 if changed
+
+</span><span class="cpp1-space">  Fl_Ext_TreeItem *m_pFirst;
+  Fl_Ext_TreeItem *m_pLast;
+};
+
+
+</span><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+</span><span class="cpp1-preprocessor">#endif </span><span class="cpp1-comment">// FL_EXT_TREE_BROWSER_H
+</span></span>
+</code></pre>
+</body>
+</html>

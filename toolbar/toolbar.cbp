@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="toolbar" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="default">
+				<Option output="toolbar" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-DWIN32 -mms-bitfields" />
+		</Compiler>
+		<Linker>
+			<Add option="-lX11 -lfltk -lfltk_images -lm -lXpm -lpng -lz -ljpeg" />
+		</Linker>
+		<Unit filename="Fl_Button_Cell.H" />
+		<Unit filename="Fl_Button_Cell.cxx" />
+		<Unit filename="Fl_ToolBar.H" />
+		<Unit filename="Fl_ToolBar.cxx" />
+		<Unit filename="Fl_ToolBar_Button.H" />
+		<Unit filename="Fl_ToolBar_Button.cxx" />
+		<Unit filename="main.cxx" />
+		<Extensions>
+			<code_completion />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

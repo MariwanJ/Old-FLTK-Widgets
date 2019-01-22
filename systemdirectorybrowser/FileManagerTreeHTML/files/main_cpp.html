@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>main_cpp.html</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="SynEdit HTML exporter" />
+<style type="text/css">
+<!--
+body { color: #000000; background-color: #FFFFFF; }
+.cpp1-assembler { color: #0000FF; }
+.cpp1-character { color: #000000; }
+.cpp1-comment { color: #3366FF; font-weight: bold; font-style: italic; }
+.cpp1-float { color: #800080; }
+.cpp1-hexadecimal { color: #800080; }
+.cpp1-identifier { color: #000000; }
+.cpp1-illegalchar { color: #000000; }
+.cpp1-number { color: #800080; }
+.cpp1-octal { color: #800080; }
+.cpp1-preprocessor { color: #4CCC4C; }
+.cpp1-reservedword { color: #000000; font-weight: bold; }
+.cpp1-space { background-color: #FFFFFF; color: #000000; }
+.cpp1-string { color: #FF0000; }
+.cpp1-symbol { color: #000000; }
+-->
+</style>
+</head>
+<body>
+<pre>
+<code><span style="font: 10pt Courier New;"><span class="cpp1-comment">//////////////////////////////////////////////////////////////////////
+</span><span class="cpp1-preprocessor">#include &lt;FL/Fl.H&gt;
+#include &lt;FL/Fl_Double_Window.H&gt;
+</span><span class="cpp1-comment">//#include &quot;fl_ext_tree_browser.H&quot;
+</span><span class="cpp1-preprocessor">#include &quot;Fl_SystemDirectory_Browser.h&quot;
+#include &lt;FL/Fl_File_Browser.H&gt;
+
+
+</span><span class="cpp1-reservedword">class</span><span class="cpp1-space"> testSystemDir : </span><span class="cpp1-reservedword">public</span><span class="cpp1-space"> Fl_SystemDirectory_Browser
+{
+</span><span class="cpp1-reservedword">public</span><span class="cpp1-space"> :
+       testSystemDir::testSystemDir(</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">int</span><span class="cpp1-symbol">,</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *l);
+  </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> HandleSelect(Fl_Ext_TreeItem *pItemClicked, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bState);
+       ~testSystemDir();
+};
+testSystemDir::~testSystemDir()
+{
+;                               
+}
+testSystemDir::testSystemDir(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> x,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> y,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> w,</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> h,</span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *l):Fl_SystemDirectory_Browser(x,y,w,h,l)
+{
+                                 
+;</span><span class="cpp1-comment">// Do nothing
+</span><span class="cpp1-space">                           
+}
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> testSystemDir::HandleSelect(Fl_Ext_TreeItem *pItemClicked, </span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> bState)
+{
+</span><span class="cpp1-comment">// You should run the original HandleSelect to get the tree be up-to-date  
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> kll=Fl_SystemDirectory_Browser::HandleSelect(pItemClicked, bState);        
+</span><span class="cpp1-comment">// Write you code here  Mariwan
+
+</span><span class="cpp1-reservedword">char</span><span class="cpp1-symbol">* PathNameString=</span><span class="cpp1-number">0</span><span class="cpp1-symbol">;
+
+
+  </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!pItemClicked==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">&amp;&amp; !bState==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+  {
+      PathNameString=  GetItemToDirectory(pItemClicked);
+    </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (!(PathNameString)==</span><span class="cpp1-number">0</span><span class="cpp1-symbol">)
+    {
+    </span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;copy_label(PathNameString);
+     </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (</span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;visible())
+          </span><span class="cpp1-reservedword">this</span><span class="cpp1-symbol">-&gt;redraw();
+    }
+ 
+  }
+ </span><span class="cpp1-reservedword">if</span><span class="cpp1-space"> (PathNameString)   </span><span class="cpp1-reservedword">delete</span><span class="cpp1-space"> [] PathNameString;  
+ 
+</span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> kll;
+}
+
+</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> main(</span><span class="cpp1-reservedword">int</span><span class="cpp1-space"> argc, </span><span class="cpp1-reservedword">char</span><span class="cpp1-space"> *argv[])
+{
+  { Fl_Double_Window* o =  </span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> Fl_Double_Window(</span><span class="cpp1-number">600</span><span class="cpp1-symbol">, </span><span class="cpp1-number">300</span><span class="cpp1-symbol">, </span><span class="cpp1-string">&quot;FLTK System Directory Browser Widget&quot;</span><span class="cpp1-symbol">);
+    testSystemDir* w= </span><span class="cpp1-reservedword">new</span><span class="cpp1-space"> testSystemDir(</span><span class="cpp1-number">2</span><span class="cpp1-symbol">, </span><span class="cpp1-number">2</span><span class="cpp1-symbol">, </span><span class="cpp1-number">300</span><span class="cpp1-symbol">, </span><span class="cpp1-number">250</span><span class="cpp1-symbol">,</span><span class="cpp1-string">&quot;Directory Browser&quot;</span><span class="cpp1-symbol">);
+    o-&gt;resizable(o); 
+    o-&gt;end(); 
+    o-&gt;show(argc, argv);
+    </span><span class="cpp1-reservedword">return</span><span class="cpp1-space"> Fl::run();
+}
+
+}
+
+
+</span></span>
+</code></pre>
+</body>
+</html>

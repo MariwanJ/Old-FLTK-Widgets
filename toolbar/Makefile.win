@@ -1,0 +1,42 @@
+# Project: toolbar
+# Makefile created by Dev-C++ 4.9.9.2
+
+CPP  = g++.exe -D__DEBUG__
+CC   = gcc.exe -D__DEBUG__
+WINDRES = windres.exe
+RES  = Toolbar_private.res
+OBJ  = main.o Fl_Button_Cell.o Fl_ToolBar.o Fl_ToolBar_Button.o $(RES)
+LINKOBJ  = main.o Fl_Button_Cell.o Fl_ToolBar.o Fl_ToolBar_Button.o $(RES)
+LIBS =  -L"D:/Dev-Cpp/lib" -mwindows -lfltk -lole32 -luuid -lcomctl32 -lwsock32 -lm   -lgmon -pg  -g3 
+INCS =  -I"D:/Dev-Cpp/include" 
+CXXINCS =  -I"D:/Dev-Cpp/lib/gcc/mingw32/3.4.2/include"  -I"D:/Dev-Cpp/include/c++/3.4.2/backward"  -I"D:/Dev-Cpp/include/c++/3.4.2/mingw32"  -I"D:/Dev-Cpp/include/c++/3.4.2"  -I"D:/Dev-Cpp/include" 
+BIN  = toolbar.exe
+CXXFLAGS = $(CXXINCS)   -pg -g3
+CFLAGS = $(INCS) -DWIN32 -mms-bitfields   -pg -g3
+RM = rm -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before toolbar.exe all-after
+
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o "toolbar.exe" $(LIBS)
+
+main.o: main.cxx
+	$(CPP) -c main.cxx -o main.o $(CXXFLAGS)
+
+Fl_Button_Cell.o: Fl_Button_Cell.cxx
+	$(CPP) -c Fl_Button_Cell.cxx -o Fl_Button_Cell.o $(CXXFLAGS)
+
+Fl_ToolBar.o: Fl_ToolBar.cxx
+	$(CPP) -c Fl_ToolBar.cxx -o Fl_ToolBar.o $(CXXFLAGS)
+
+Fl_ToolBar_Button.o: Fl_ToolBar_Button.cxx
+	$(CPP) -c Fl_ToolBar_Button.cxx -o Fl_ToolBar_Button.o $(CXXFLAGS)
+
+Toolbar_private.res: Toolbar_private.rc 
+	$(WINDRES) -i Toolbar_private.rc --input-format=rc -o Toolbar_private.res -O coff 

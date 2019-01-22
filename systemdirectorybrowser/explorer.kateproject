@@ -1,0 +1,7 @@
+[Project Dir]
+Dirs=
+Files=fl_ext_tree_browser.cpp/fl_ext_tree_browser.h/fl_ext_tree_item.cpp/fl_ext_tree_item.h/fl_systemdirectory_browser.cpp/fl_systemdirectory_browser.h/fl_systemdirectory_icons.h/main.cpp
+
+[Project File]
+Name=explorer
+Type=Default
