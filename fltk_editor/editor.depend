@@ -1,0 +1,101 @@
+# depslib dependency file v1.0
+1174064418 source:/home/jama/Projects/fltk_editor/Editor.cpp
+	"Editor.h"
+	<FL/Fl_Pixmap.H>
+	<FL/Fl_Image.H>
+
+1174064088 /home/jama/Projects/fltk_editor/Editor.h
+	<FL/Fl.H>
+	<stdlib.h>
+	<Fl/Fl_Text_Buffer.h>
+	"Fl_Split.h"
+	<FL/Fl_Group.h>
+	<FL/Fl_Text_Editor.H>
+	<Fl/Fl_PNM_Image.h>
+	"fl_systemdirectory_browser.h"
+	"fl_font_browser.h"
+	<Fl/Fl_Shared_Image.h>
+	<Fl/Fl_Button.h>
+	<FL/Fl_File_Chooser.H>
+	<FL/fl_ask.H>
+	<stdio.h>
+	<iostream>
+	<errno.h>
+	"fl_color_direct_selector.h"
+	<FL/Fl_Double_Window.H>
+	<FL/Fl_Tabs.H>
+	<FL/Fl_Group.H>
+	<FL/Fl_Button.H>
+	<FL/Fl_Box.H>
+	<FL/Fl_Value_Input.H>
+	<FL/Fl_Repeat_Button.H>
+	<FL/Fl_Menu_Button.H>
+	<FL/Fl_Input.H>
+	<FL/Fl_Menu_Bar.H>
+	<FL/Fl_Output.H>
+	<FL/Fl_Help_View.H>
+	<FL/Fl_File_Browser.H>
+	<FL/Fl_Tile.H>
+
+1174062486 /home/jama/Projects/fltk_editor/Fl_Split.h
+	<FL/Fl_Group.H>
+
+1173995344 /home/jama/Projects/systemdirectorybrowser/fl_systemdirectory_browser.h
+	<stdio.h>
+	<string.h>
+	<stdlib.h>
+	"fl_systemdirectory_icons.h"
+	"fl_ext_tree_browser.h"
+	"fl_ext_tree_item.h"
+	<Fl/filename.H>
+	<Fl/Fl_File_Icon.h>
+	<Fl/x.h>
+	<FL/fl_draw.H>
+	"flstring.h"
+	<mntent.h>
+	<windows.h>
+	<direct.h>
+	<os2.h>
+
+1119181644 /home/jama/Projects/systemdirectorybrowser/fl_systemdirectory_icons.h
+
+1173995433 /home/jama/Projects/systemdirectorybrowser/fl_ext_tree_browser.h
+	"FL/Fl_Group.H"
+	<FL/Fl_Scrollbar.H>
+	"fl_ext_tree_item.h"
+
+1173995313 /home/jama/Projects/systemdirectorybrowser/fl_ext_tree_item.h
+	<Fl/Fl_Pixmap.h>
+
+1107072012 /home/jama/Projects/systemdirectorybrowser/flstring.h
+	<FL/Fl_Export.H>
+	<stdarg.h>
+	<string.h>
+	<strings.h>
+	<ctype.h>
+
+1129735678 /home/jama/Projects/FontBrowser/fl_font_browser.h
+	<FL/Fl.H>
+	<FL/Fl_Double_Window.H>
+	<FL/Fl_Browser.H>
+	<FL/Fl_Input.H>
+	<FL/Fl_Button.H>
+	<FL/Fl_Box.H>
+	<FL/Fl_Group.H>
+	<FL/Fl_Check_Button.H>
+	<FL/fl_draw.H>
+	<FL/fl_show_colormap.h>
+	<iostream>
+
+1123990440 /home/jama/Projects/ColorBrowser/fl_color_direct_selector.h
+	<FL/Fl.H>
+	<FL/fl_draw.h>
+	<FL/Fl_Group.H>
+	<FL/Fl_Menu_Button.H>
+	<FL/Fl_Image.H>
+	<FL/Fl_Box.H>
+	"Fl_color_plate.H"
+	<stdio.h>
+
+1122162332 /home/jama/Projects/ColorBrowser/Fl_color_plate.H
+

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="editor" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="obj/Debug/fltk_1" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="/home/jama/Projects/systemdirectorybrowser" />
+					<Add directory="/home/jama/Projects/ColorBrowser" />
+					<Add directory="/home/jama/Projects/FontBrowser" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/fltk_1" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add directory="/home/jama/Projects/systemdirectorybrowser" />
+					<Add directory="/home/jama/Projects/ColorBrowser" />
+					<Add directory="/home/jama/Projects/FontBrowser" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="/home/jama/Projects/systemdirectorybrowser" />
+			<Add directory="/home/jama/Projects/ColorBrowser" />
+			<Add directory="/home/jama/Projects/FontBrowser" />
+		</Compiler>
+		<Linker>
+			<Add option="-lX11 -lfltk -lfltk_images -lm -lXpm -lpng -lz -ljpeg" />
+		</Linker>
+		<Unit filename="Editor.cpp" />
+		<Unit filename="Editor.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

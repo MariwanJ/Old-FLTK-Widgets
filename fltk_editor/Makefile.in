@@ -1,0 +1,46 @@
+C	= gcc
+CXX	= g++
+LD	= g++
+CPP	= g++
+
+TARGET	= Editor
+FLUID	= fluid
+PREFIX=*
+IFLAGS	= -I/usr/X11/include 
+LFLAGS	= -L/usr/X11R6/lib -L/usr/local/lib
+CPPFLAGS= -O2 $(IFLAGS) $(DFLAGS) -Wall
+CXXFLAGS= -O2 $(IFLAGS) $(DFLAGS) -Wall
+CFLAGS	= -O2 $(IFLAGS) $(DFLAGS) -Wall
+LIBS	= -lX11 -lfltk -lfltk_images -lm -lXpm -lpng -lz -ljpeg
+
+SUBDIR= ../FontBrowser ../colorbrowser ../systemdirectorybrowser
+
+CPP_SRC	= Editor.cpp fl_font_browser.cpp fl_systemdirectory_browser.cpp fl_ext_tree_item.cpp\
+          fl_ext_tree_browser.cpp fl_color_direct_selector.cpp
+OBJS	= $(CPP_SRC:.cpp=.o) $(C_SRC:.c=.o)
+
+all	: $(TARGET)
+
+.SUFFIXES:	.cpp .cxx .c .h .o .fld
+
+.fld.cxx:
+	$(FLUID) -c $<
+.cxx.o :
+	$(CXX) -c $< -o $(<:.cxx=.o) $(CXXFLAGS)
+
+.cpp.o :
+	$(CPP) -c $< -o $(<:.cpp=.o) $(CPPFLAGS)
+
+.c.o :
+	$(CC) -c $< -o $(<:.c=.o) $(CPPFLAGS)
+
+$(TARGET) : $(OBJS)
+	$(LD) -o $(TARGET) $(OBJS) $(LFLAGS) $(LLIBS) $(LIBS)
+
+clean:
+	-rm *.o
+	-rm $(TARGET)
+
+backup:
+	tar cvf $(TARGET).tar $(PREFIX).* Makefile 
+	gzip $(TARGET).tar

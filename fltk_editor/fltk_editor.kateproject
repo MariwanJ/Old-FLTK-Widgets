@@ -1,0 +1,7 @@
+[Project Dir]
+Dirs=
+Files=Editor.cpp/Editor.h/Makefile
+
+[Project File]
+Name=FLTK_Editor
+Type=Default

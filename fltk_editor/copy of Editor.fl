@@ -1,0 +1,2763 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0107 
+header_name {.h} 
+code_name {.cpp}
+decl {\#include <stdlib.h>} {public
+} 
+
+decl {\#include <Fl/Fl_Text_Buffer.h>} {public
+} 
+
+decl {\#include "Fl_Split.h"} {public
+} 
+
+decl {\#include <FL/Fl_Group.h>} {public
+} 
+
+decl {\#include <FL/Fl_Text_Editor.H>} {public
+} 
+
+decl {\#include <Fl/Fl_PNM_Image.h>} {public
+} 
+
+decl {\#include "fl_systemdirectory_browser.h"} {public
+} 
+
+decl {\#include "fl_font_browser.h"} {public
+} 
+
+decl {\#include <Fl/Fl_Shared_Image.h>} {public
+} 
+
+decl {\#include <Fl/Fl_Button.h>} {public
+} 
+
+decl {\#include <FL/Fl_File_Chooser.H>} {public
+} 
+
+decl {\#include <FL/fl_ask.H>} {public
+} 
+
+decl {\#include <stdio.h>} {public
+} 
+
+decl {\#include <iostream>} {public
+} 
+
+decl {\#include <errno.h>} {public
+} 
+
+decl {\#include "fl_color_direct_selector.h"} {public
+} 
+
+decl {using namespace std;} {} 
+
+decl {\#define INITIALREPEAT 0.5} {} 
+
+decl {\#define REPEAT 0.5} {} 
+
+Function {cb_PreviewBoxClicked(Fl_Widget* w, void*gg)} {return_type {static void}
+} {
+  code {// Fl_Preview_Image callback function
+
+// ama halaya .. sairi color direct selector bika .. dabet x . y bidaite .. inja fl:rgb bikait
+
+Fl_Preview_Image *gd=(Fl_Preview_Image*) gg ;
+      uchar r=0;
+      uchar g=0;
+      uchar b=0;
+  
+
+
+if (gd->image())            
+ {
+  GetPixelColorOfImage(gd->image(),gd->Xclicked,gd->Yclicked, r,g,b);
+  long int gde=fl_rgb_color(r,g,b);
+  char buf[7];
+  snprintf(buf,7,"\#%X",gde);
+  lbClickedColor->value(buf);
+  btnCopyColorCode->color(gde);// show the color on the copy btn.
+  btnCopyColorCode->redraw();
+ }} {}
+} 
+
+class Fl_Preview_Image {: {public Fl_Box}
+} {
+  Function {Fl_Preview_Image(int x, int y, int w, int h, char*l):Fl_Box(x,y,w,h,l)} {open
+  } {
+    code {//Zero as default for clicked x,y
+Xclicked=Yclicked=0;} {}
+  }
+  Function {handle(int e)} {open return_type {virtual int}
+  } {
+    code {switch (e)
+    {
+      case FL_PUSH: {
+                     Xclicked=Fl::event_x()-x(); //save clicked position
+                     Yclicked=Fl::event_y()-y();
+                     do_callback();
+                     return 1;
+                     }
+                    break;
+      default:
+           return Fl_Box::handle(e);
+    }} {}
+  }
+  decl {int Xclicked,Yclicked;} {public
+  }
+} 
+
+Function {cb_InsertTag(Fl_Widget*, void* Tag)} {return_type {static void}
+} {
+  code {Fl_New_File* st=(Fl_New_File *)(txt_Tab_Edit->value());  
+if (!(txt_Tab_Edit->visible())) // check if the text buffer is visible
+      return;
+st->e->insert_mode(1);// inset not replace
+char *selectedText=st->t->selection_text();
+if (strlen(selectedText)==0)
+ {
+   st->t->insert(st->e->GetCursorPosition(),(char *)Tag);
+   int coun=strlen((char*)Tag);
+   char *seekP=(char*)Tag;
+   while(!(seekP[coun-1]=='<' && seekP[coun]=='/'))
+  {
+    coun--;
+  }
+   coun--;
+   st->e->insert_position(st->e->insert_position()+coun);
+   st->e->focus(st->e);
+ }
+else
+{
+   st->t->remove_selection(); 
+   st->t->insert(st->e->GetCursorPosition(),(char *)Tag);
+   int coun=strlen((char*)Tag);
+   char *seekP=(char*)Tag;
+   while(!(seekP[coun-1]=='<' && seekP[coun]=='/'))
+  {
+    coun--;
+  }
+   coun--;
+   st->t->insert(st->e->insert_position()+coun, selectedText);
+   st->e->insert_position(st->e->insert_position()+strlen((char*)Tag)+strlen(selectedText));
+   st->e->focus(st->e);  
+}
+free(selectedText); // Free the memory} {}
+} 
+
+class GetDir {: {public Fl_SystemDirectory_Browser}
+} {
+  Function {GetDir( int x, int y, int w, int h, char* l):Fl_SystemDirectory_Browser(x,y,w,h,l)} {open
+  } {}
+  Function {HandleSelect(Fl_Ext_TreeItem* pItem, int bState)} {open return_type int
+  } {
+    code {// here this function should open the directory in the other browser
+if (bState)
+{
+  fl_File_View->load(GetItemToDirectory(pItem));
+}
+return Fl_SystemDirectory_Browser::HandleSelect(pItem, bState);} {}
+  }
+} 
+
+class Fl_Ext_Text_Editor {: {public Fl_Text_Editor}
+} {
+  decl {int SetNew;} {public
+  }
+  Function {Fl_Ext_Text_Editor(int x, int y, int w, int h, char*l):Fl_Text_Editor(x,y,w,h,l)} {open
+  } {
+    code {// constructor
+Fl::add_timeout(INITIALREPEAT, blinkCursor, this);
+SetNew=1;} {}
+  }
+  Function {~Fl_Ext_Text_Editor()} {open
+  } {
+    code {Fl::remove_timeout(blinkCursor,this);} {}
+  }
+  Function {GetCursorPosition()} {open return_type int
+  } {
+    code {return mCursorPos;} {}
+  }
+  Function {blinkCursor(void* TxtObject)} {open return_type {static void}
+  } {
+    code {Fl_Ext_Text_Editor *tempText=(Fl_Ext_Text_Editor*)(TxtObject);
+     tempText->SetNew=!tempText->SetNew;
+     tempText->show_cursor(tempText->SetNew);
+     Fl::repeat_timeout(REPEAT,blinkCursor, tempText);} {}
+  }
+} 
+
+class Fl_New_File {: {public Fl_Group}
+} {
+  decl {Fl_Ext_Text_Editor *e;} {public
+  }
+  decl {Fl_Text_Buffer  *t;} {public
+  }
+  decl {Fl_Button *b;} {public
+  }
+  decl {int changed;} {public
+  }
+  decl {static int counter;} {public
+  }
+  decl {char fileName[4056];} {public
+  }
+  decl {Fl_New_File *pNext;} {public
+  }
+  decl {Fl_New_File *pPrev;} {public
+  }
+  decl {int NotSaved;  // 1 true 0 false} {public
+  }
+  Function {Fl_New_File(int x, int y, int w, int h, char*l):Fl_Group(x,y,w,h,l)} {open
+  } {
+    code {// Class constructor for the text editor part.
+   begin();
+   changed=1;  // Modified
+   NotSaved=1;  //Not saved
+   snprintf(fileName,strlen(l)+1,"%s",l);
+   e=new Fl_Ext_Text_Editor(x,y+10,w,h,"");
+   t=new Fl_Text_Buffer;
+   t->add_modify_callback(Style_Color_determine, this);
+//   t->add_modify_callback(changed_cb,this);// callback when change made on the file
+   b=new Fl_Button(x+w-15,y,10,10,"x");
+   b->callback((Fl_Callback*)cb_File_Close);
+   t->text("<html>\\n<head>\\n<title></title>\\n<meta name=\\"author\\" content=\\"Mariwan\\">\\n<meta name=\\"generator\\" content=\\"FLTK HTMLEditor\\">\\n</head>\\n<body text=\\"\#000000\\" bgcolor=\\"\#FFFFFF\\" link=\\"\#FF0000\\" alink=\\"\#FF0000\\" vlink=\\"\#FF0000\\">\\n\\n</body>\\n</html>");
+   e->buffer(t);
+   pNext=0;  // No next object yet.
+   pPrev=0; // it is the first object
+   box(FL_THIN_UP_BOX);
+   color(FL_BACKGROUND_COLOR);
+   selection_color(FL_BACKGROUND_COLOR);
+   labeltype(FL_NORMAL_LABEL);
+   labelfont(0);
+   labelsize(9);
+   labelcolor(FL_BLACK);
+   align(FL_ALIGN_TOP);
+   when(FL_WHEN_RELEASE);
+   end();} {}
+  }
+  Function {~Fl_New_File()} {open
+  } {}
+} 
+
+decl {int Fl_New_File::counter=1;} {} 
+
+Function {cb_tab_FileManager(Fl_Widget*  , void* getdata)} {open return_type {static void}
+} {
+  code {Fl_Tabs* tb= (Fl_Tabs*)(getdata);
+
+if (((tb->value())->label())=="Editor")
+ 
+  {
+	gr_View_Browser->hide();
+	gr_View_Picture->hide();
+        Fl_New_File* st=(Fl_New_File *)txt_Tab_Edit->value();   
+        st->e->focus(st->e);
+        txt_Tab_Edit->show();
+  }
+
+if (((tb->value())->label())=="Picture")
+ 
+  {
+	gr_View_Browser->hide(); // HTML Brwoser
+        txt_Tab_Edit->hide();   // Editor
+        gr_View_Picture->show();    
+        previewBox->show();
+        cb_ShowPicturePreview();
+  }
+
+if (((tb->value())->label())=="Browser")
+  {
+                                        
+        gr_View_Browser->show();                              
+    	gr_View_Picture->hide();
+        txt_Tab_Edit->hide();
+
+  }} {}
+} 
+
+Function {cb_ShowPicturePreview(void)} {open return_type void
+} {
+  code {// Here we should write our code for previewing a picture file..
+
+ if (!(previewBox->visible())) // if the preview Box is not visible .. do nothing.
+       return;
+   char preview_text_ [1024];
+   char	      filename[4096];	// Current filename
+   Fl_Shared_Image	*image,		// New image
+	        		*oldimage;	// Old image
+   int			pbw, pbh;	// Width and height of preview box
+   int			w, h;		// Width and height of preview image
+
+     char* tempfilename=(char*)(fl_File_View->text(fl_File_View->value()));
+	 snprintf(filename,sizeof(filename),"%s%s",(direcotryBrowser->GetItemToDirectory(direcotryBrowser->Selection())), tempfilename);
+	 cout <<filename<<endl;
+    ///fl_File_View->value() ama naui file akaya
+
+ // if (!preview_box->value()) return;
+  fl_register_images();
+  if ((filename == NULL)) 
+    image = NULL;
+  else 
+  {
+    window->cursor(FL_CURSOR_WAIT);
+    Fl::check();
+
+    image = Fl_Shared_Image::get(filename);
+
+    if (image) {
+      window->cursor(FL_CURSOR_DEFAULT);
+      Fl::check();
+    }
+  }
+
+  oldimage = (Fl_Shared_Image *)previewBox->image();
+
+  if (oldimage) oldimage->release();
+
+  previewBox->image(0);
+
+  if (!image)  // text...
+  {
+    FILE	*fp;
+    int		bytes;
+    char	*ptr;
+    int event_type=Fl::event_clicks();
+     if (event_type>0)
+     {
+       load_file(filename);
+     }
+     else
+       if (filename) 
+         fp = fopen(filename, "rb");
+       else 
+         fp = NULL;
+
+    if (fp != NULL)
+     {
+      // Try reading the first 1k of data for a label...
+      bytes = fread(preview_text_, 1, sizeof(preview_text_) - 1, fp);
+      preview_text_[bytes] = '\\0';
+      fclose(fp);
+    } else {
+      // Assume we can't read any data...
+      preview_text_[0] = '\\0';
+    }
+
+    window->cursor(FL_CURSOR_DEFAULT);
+    Fl::check();
+
+    // Scan the buffer for printable chars...
+    for (ptr = preview_text_; *ptr && (isprint(*ptr & 255) || isspace(*ptr & 255)); ptr ++);
+        if (*ptr || ptr == preview_text_)
+        {
+              // Non-printable file, just show a big ?...
+               previewBox->label(filename ? "?" : 0);
+               previewBox->align(FL_ALIGN_CLIP);
+               previewBox->labelsize(100);
+               previewBox->labelfont(FL_HELVETICA);
+         }
+          else 
+        {
+           // Show the first 1k of text...
+            int size = previewBox->h() / 20;
+            if (size < 6) 
+               size = 6;
+            else 
+             if (size > 14) 
+               size = 14;
+
+            previewBox->label(preview_text_);
+            previewBox->align((Fl_Align)(FL_ALIGN_CLIP | FL_ALIGN_INSIDE | FL_ALIGN_LEFT | FL_ALIGN_TOP));
+            previewBox->labelsize((uchar)size);
+            previewBox->labelfont(FL_COURIER);
+        }
+  } 
+  else
+ { // show the image ... 
+   /// but this should not be done if the box is not shown!!
+         if (((Fl_Tabs*)(tab_FileManager->value())!=(tab_Picture_View)))
+               return; // do nothing
+    pbw = previewBox->w() - 20;
+    pbh = previewBox->h() - 20;
+// check this to get exact size to the preview box or to maximize it 
+    if (image->w() > pbw || image->h() > pbh)
+    {
+          w   = pbw;
+          h   = w * image->h() / image->w();
+
+         if (h > pbh) 
+         {
+	      h = pbh;
+	      w = h * image->w() / image->h();
+          }
+
+         oldimage = (Fl_Shared_Image *)image->copy(w, h);
+         previewBox->image((Fl_Image *)oldimage);
+         image->release();
+    } 
+    else 
+    {
+      previewBox->image((Fl_Image *)image);
+      
+    }
+    // this is to make the alignment of the picture as top-left 
+    previewBox->align(FL_ALIGN_CLIP | FL_ALIGN_INSIDE | FL_ALIGN_LEFT | FL_ALIGN_TOP);
+    previewBox->label(0);
+  }
+  previewBox->redraw();} {}
+} 
+
+Function {GetPixelColorOfImage(void *imagePointer, int x,int y,  uchar &r, uchar  &g, uchar &b)} {open return_type void
+} {
+  code {if (!(imagePointer))
+    {
+       return;                 
+    }
+    
+ Fl_Image *ImageToBeRead=(Fl_Image *)(imagePointer);
+ if (((ImageToBeRead->h()+previewBox->y()<y)|| (ImageToBeRead->w()+previewBox->x()<x)))
+    {
+       // The clicked X,Y is outside the picture 
+       return;                                              
+                                                
+    }
+
+   const char *buf = ImageToBeRead->data()[0];
+   long index = (y * ImageToBeRead->w() * ImageToBeRead->d()) + (x * ImageToBeRead->d());
+         r = *(buf+index+0);
+         g = *(buf+index+1);
+         b = *(buf+index+2);
+        printf("%2x %2x %2x %d %d\\n",                                  // hex dump r/g/b
+        (unsigned char)r,
+		(unsigned char)g,
+		(unsigned char)b,
+         x,y);
+         return;} {}
+} 
+
+Function {load_file(char *newfile)} {open return_type void
+} {
+  code {// this should be modified ... it is from Editor
+
+Fl_New_File *Prev =(Fl_New_File*)txt_Tab_Edit->value();  // get active tab
+if(Prev)
+{
+  while (Prev->pNext)
+    Prev=Prev->pNext; // get the last one 
+}
+
+   txt_Tab_Edit->begin();
+   char justFileName[30];
+   char*scancp=newfile;
+   int scanp= strlen(newfile)-1;
+   char OLDjustFileName[30];
+   snprintf(OLDjustFileName,1, "%c", '\\0');
+   snprintf(justFileName,1, "%c", '\\0');
+    char tempChar;
+   while (((int)(scancp[scanp])!=0x2f)&&((int)(scancp[scanp])!=0x5c))  // 0x2f= /
+      {
+       
+       tempChar=scancp[scanp];
+       strcpy(OLDjustFileName,justFileName);
+       if (!(strlen(OLDjustFileName)==0))
+       {
+
+          snprintf(justFileName,strlen(OLDjustFileName)+2, "%c%s", tempChar,OLDjustFileName);
+       }
+       else
+       {
+         snprintf(justFileName,2, "%c", tempChar);
+       }
+       scanp=scanp-1;
+      }
+   char buf[30];
+   snprintf(buf,30,"%s",justFileName);
+   Fl_New_File *st=new Fl_New_File(230,125,1050,840,"");
+   st->copy_label(buf);
+   //snprintf(st->fileName, strlen(newfile),"%s",newfile); // save file name 
+    strcpy(st->fileName, newfile); // save file name 
+    
+
+  int r;
+     r = st->t->loadfile(newfile);
+  if (r)
+   {
+	if (strlen(newfile)==0)
+          return;
+        else
+         fl_alert("Error reading from file \\'%s\\':\\n%s.", newfile, strerror(errno));
+    }
+
+  else
+
+st->pPrev=Prev; // make the link
+if(Prev)
+  Prev->pNext=st; // make the link
+st->NotSaved=0; // Not saved
+Fl_New_File::counter++;
+  st->t->call_modify_callbacks();
+  txt_Tab_Edit->end();
+  txt_Tab_Edit->value(st);
+  txt_Tab_Edit->redraw();} {}
+} 
+
+Function {} {open
+} {
+  Fl_Window window {
+    label {FLTK Editor} open
+    xywh {-188 167 1280 744} type Double labelsize 12 hide resizable
+  } {
+    Fl_Tabs {} {
+      xywh {0 53 1281 52} color 7 selection_color 26
+    } {
+      Fl_Group mnu_Tab_Text {
+        label Text open
+        xywh {0 73 1272 32}
+      } {
+        Fl_Button {} {
+          user_data {"<p>   </p>"}
+          callback cb_InsertTag
+          tooltip Paragraph image {../fltk_editor/toolbar/format.paragraph.png} xywh {6 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<div align=\\"left\\">   </div>"}
+          callback cb_InsertTag
+          tooltip {Left align} image {../fltk_editor/toolbar/button.justifyleft.xpm} xywh {38 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<div align=\\"center\\"></div>"}
+          callback cb_InsertTag
+          tooltip {Center align} image {../fltk_editor/toolbar/button.justifycenter.xpm} xywh {63 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<div align=\\"right\\"></div>"}
+          callback cb_InsertTag
+          tooltip {Right align} image {../fltk_editor/toolbar/button.justifyright.xpm} xywh {96 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<p align=\\"justify\\"></p>"}
+          callback cb_InsertTag
+          tooltip Justified image {../fltk_editor/toolbar/button.justifyfull.xpm} xywh {126 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<ul></ul>"}
+          callback cb_InsertTag
+          tooltip Indent image {../fltk_editor/toolbar/button.indent.xpm} xywh {156 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<b></b>"}
+          callback cb_InsertTag
+          tooltip Bold image {../fltk_editor/toolbar/button.bold.xpm} xywh {186 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<i></i>"}
+          callback cb_InsertTag
+          tooltip Italic image {../fltk_editor/toolbar/button.italic.xpm} xywh {216 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<u></u>"}
+          callback cb_InsertTag
+          tooltip {Under Line} image {toolbar/button.underline.xpm} xywh {246 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<sup></sup>"}
+          callback cb_InsertTag
+          tooltip Superscript image {../fltk_editor/toolbar/button.superscript.xpm} xywh {276 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<sub></sub>"}
+          callback cb_InsertTag
+          tooltip Subscript image {../fltk_editor/toolbar/button.subscript.xpm} xywh {306 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          label PRE
+          user_data {"<pre></pre>"}
+          callback cb_InsertTag
+          xywh {336 75 25 25} box FLAT_BOX down_box DOWN_BOX labelfont 14 labelsize 9
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          label H1
+          user_data {"<h1></h1>"}
+          callback cb_InsertTag
+          xywh {366 75 25 25} box FLAT_BOX down_box DOWN_BOX labelfont 3
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          label H2
+          user_data {"<h2></h2>"}
+          callback cb_InsertTag
+          xywh {396 75 25 25} box FLAT_BOX down_box DOWN_BOX labelfont 3
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          label H3
+          user_data {"<h3></h3>"}
+          callback cb_InsertTag
+          xywh {427 75 25 25} box FLAT_BOX down_box DOWN_BOX labelfont 3
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          label H4
+          user_data {"<h4></h4>"}
+          callback cb_InsertTag
+          xywh {457 75 25 25} box FLAT_BOX down_box DOWN_BOX labelfont 3
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          label H5
+          user_data {"<h5></h5>"}
+          callback cb_InsertTag
+          xywh {487 75 25 25} box FLAT_BOX down_box DOWN_BOX labelfont 3
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          label {+4}
+          user_data {"<font size=\\"+4\\"></font>"}
+          callback cb_InsertTag
+          xywh {517 75 25 25} box FLAT_BOX down_box DOWN_BOX labelfont 3
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          label {+3}
+          user_data {"<font size=\\"+3\\"></font>"}
+          callback cb_InsertTag
+          xywh {547 75 25 25} box FLAT_BOX down_box DOWN_BOX labelfont 3
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          label {+2}
+          user_data {"<font size=\\"+2\\"></font>"}
+          callback cb_InsertTag
+          xywh {574 75 25 25} box FLAT_BOX down_box DOWN_BOX labelfont 3
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          label {+1}
+          user_data {"<font size=\\"+1\\"></font>"}
+          callback cb_InsertTag
+          xywh {602 75 25 25} box FLAT_BOX down_box DOWN_BOX labelfont 3
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          label {-1}
+          user_data {"<font size=\\"-1\\"></font>"}
+          callback cb_InsertTag
+          xywh {625 75 25 25} box FLAT_BOX down_box DOWN_BOX labelfont 3
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          callback cb_Select_Font
+          tooltip {Font custimize} image {../fltk_editor/toolbar/button.fontstyleadv.xpm} xywh {649 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<br>"}
+          callback cb_InsertTag
+          tooltip Break image {../fltk_editor/toolbar/button.source.xpm} xywh {670 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+      }
+      Fl_Group mnu_Tab_Table {
+        label Table open
+        xywh {0 73 1025 32} labelsize 12 hide
+      } {
+        Fl_Button {} {
+          callback {cb_Table_Assistant();}
+          image {../fltk_editor/toolbar/button.table.xpm} xywh {110 76 25 25} box FLAT_BOX down_box DOWN_BOX color 118
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Box {} {
+          label {Table Assistant}
+          tooltip {Table Wizard} xywh {40 75 70 25} align 24
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Group {} {open
+          xywh {252 75 50 25}
+        } {
+          Fl_Value_Input mnu_Table_Column {
+            label {   Column}
+            tooltip {Column number} xywh {252 75 33 25} align 8 minimum 1 maximum 25 step 1 value 2
+          }
+          Fl_Repeat_Button {} {
+            label {@2>}
+            callback {if(!(( mnu_Table_Column->value())<=1))
+mnu_Table_Column->value(mnu_Table_Column->value()-1);}
+            xywh {284 87 14 12} labelsize 7
+          }
+          Fl_Repeat_Button {} {
+            label {@2<}
+            callback {if(!(( mnu_Table_Column->value())>=25))
+mnu_Table_Column->value(mnu_Table_Column->value()+1);}
+            xywh {284 76 14 12} labelsize 7
+          }
+        }
+        Fl_Button {} {
+          tooltip {Insert custimized table} image {../fltk_editor/toolbar/button.table.gif} xywh {361 75 25 25} box FLAT_BOX down_box DOWN_BOX color 93 selection_color 93
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          tooltip {Insert row} image {../fltk_editor/toolbar/button.tableinsertcell.gif} xywh {401 75 25 25} box FLAT_BOX down_box THIN_DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          tooltip {Insert column} image {../fltk_editor/toolbar/button.tableinsertcolumn.gif} xywh {437 75 25 25} box FLAT_BOX down_box THIN_DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          tooltip {Configuration of the table} image {../fltk_editor/toolbar/format.table.PNG} xywh {471 75 25 25} box FLAT_BOX down_box THIN_DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Group {} {open
+          xywh {200 76 48 25}
+        } {
+          Fl_Value_Input mnu_Table_Row {
+            label Row
+            tooltip {Row number} xywh {200 76 35 25} minimum 1 maximum 25 step 1 value 2
+          }
+          Fl_Repeat_Button {} {
+            label {@2<}
+            callback {if(!(( mnu_Table_Row->value())>=25))
+mnu_Table_Row->value(mnu_Table_Row->value()+1);}
+            xywh {234 77 14 12} labelsize 7
+          }
+          Fl_Repeat_Button {} {
+            label {@2>}
+            callback {if(!(( mnu_Table_Row->value())<=1))
+mnu_Table_Row->value(mnu_Table_Row->value()-1);}
+            xywh {234 88 14 12} labelsize 7
+          }
+        }
+      }
+      Fl_Group mnu_Tab_List {
+        label List open
+        xywh {0 73 1025 32} labelsize 12 hide
+      } {
+        Fl_Button {} {
+          user_data {"<ul></ul>"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/button.insertunorderedlist.xpm} xywh {14 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<ol start=\\"1\\" type=\\"1\\">     <li></li>     </ol>"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/button.insertorderedlist.xpm} xywh {48 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<ol start=\\"1\\" type=\\"I\\">     <li></li>     </ol>"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/IIILIST.PNG} xywh {83 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<ol start=\\"1\\" type=\\"i\\">     <li></li>     </ol>"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/IIILIST1.PNG} xywh {116 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<ol start=\\"1\\" type=\\"A\\">     <li></li>     </ol>"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/ABCList.PNG} xywh {146 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<ol start=\\"1\\" type=\\"a\\">     <li></li>     </ol>"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/ABCList1.PNG} xywh {176 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<li> </li>"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/li_list.PNG} xywh {206 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<dl>  <dt> <dd>  </dl>"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/dldddt_list.PNG} xywh {248 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<dt>  <dd>"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/dldddt1_list.PNG} xywh {282 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+      }
+      Fl_Group mnu_Tab_Css {
+        label CSS open
+        xywh {0 73 1025 32} labelsize 12 hide
+      } {
+        Fl_Button {} {
+          label {Style Definition <style type =..>}
+          user_data {"<style type=\\"text/css\\"><!--  --></style>"}
+          callback cb_InsertTag
+          xywh {20 75 188 25} box FLAT_BOX down_box DOWN_BOX labelsize 12
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          tooltip {Define New Style} image {../fltk_editor/toolbar/Style.PNG} xywh {282 75 30 24} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Box {} {
+          label {Define New Style}
+          xywh {309 78 117 19}
+          code0 {o->clear_visible_focus();}
+        }
+      }
+      Fl_Group mnu_Tab_Equations {
+        label Forms open
+        xywh {0 73 1020 32} labelsize 12 hide
+      } {
+        Fl_Button {} {
+          user_data {"<form action=\\"\\" method=\\"\\" target=\\"\\"></form>"}
+          callback cb_InsertTag
+          tooltip Forms image {../fltk_editor/images/icons/exe.gif} xywh {17 76 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<input type= \\"Submit\\" name=\\"\\" value=\\"\\">"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/form.Submit.PNG} xywh {53 75 25 25} box FLAT_BOX down_box DOWN_BOX labelsize 12
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<input type=\\"reset\\">"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/form.Reset.PNG} xywh {87 75 25 25} box FLAT_BOX down_box DOWN_BOX labelsize 12
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<input type=\\"Text\\" name=\\"\\" value=\\"\\" size=\\"\\" maxlength=\\"\\">"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/form.Input.PNG} xywh {122 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<input type=\\"Password\\" name=\\"\\" value=\\"\\" size=\\"\\" maxlength=\\"\\">"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/form.Password.PNG} xywh {154 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<input type=\\"Radio\\" name=\\"\\" value=\\"v\\">"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/form.radio.PNG} xywh {206 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<input type=\\"Checkbox\\" name=\\"\\" value=\\"v\\">"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/form.checkbox.PNG} xywh {229 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<select name=\\"\\" size=\\"\\"></select>"}
+          callback cb_InsertTag
+          image {../fltk_editor/toolbar/form.list.PNG} xywh {259 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          label {<option>}
+          user_data {"<option value=\\"\\">"}
+          callback cb_InsertTag
+          xywh {294 75 40 25} box FLAT_BOX down_box DOWN_BOX labelfont 1 labelsize 9
+          code0 {o->clear_visible_focus();}
+        }
+        Fl_Button {} {
+          user_data {"<textarea name=\\"\\" cols=\\"\\" rows=\\"\\"></textarea>"}
+          callback cb_InsertTag
+          image {ICONS/button.textarea.xpm} xywh {180 75 25 25} box FLAT_BOX down_box DOWN_BOX
+          code0 {o->clear_visible_focus();}
+        }
+      }
+      Fl_Group mnu_Tab_Java {
+        label Java open
+        xywh {0 73 1025 32} labelsize 12 hide
+      } {
+        Fl_Menu_Button {} {
+          label events open
+          image {../fltk_editor/toolbar/run.png} xywh {5 75 90 24} box FLAT_BOX down_box THIN_UP_BOX labelsize 10
+        } {
+          MenuItem {} {
+            label onLoad
+            user_data {"onLoad\\"\\""}
+            callback cb_InsertTag
+            xywh {0 0 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onUnload
+            user_data {"onUnload\\"\\""}
+            callback cb_InsertTag
+            xywh {0 0 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onClick
+            user_data {"onClick\\"\\""}
+            callback cb_InsertTag
+            xywh {0 0 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onDBLclick
+            user_data {"onDBLclick\\"\\""}
+            callback cb_InsertTag
+            xywh {10 10 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onMouseDown
+            user_data {"onMouseDown\\"\\""}
+            callback cb_InsertTag
+            xywh {10 10 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onMouseUp
+            user_data {"onMouseUp\\"\\""}
+            callback cb_InsertTag
+            xywh {10 10 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onMouseOver
+            user_data {"onMouseOver\\"\\""}
+            callback cb_InsertTag
+            xywh {10 10 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onMouseMove
+            user_data {"onMouseMove\\"\\""}
+            callback cb_InsertTag
+            xywh {10 10 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onMouseOut
+            user_data {"onMouseOut\\"\\""}
+            callback cb_InsertTag
+            xywh {10 10 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onFocus
+            user_data {"onFocus\\"\\""}
+            callback cb_InsertTag
+            xywh {20 20 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onBlur
+            user_data {"onBlur\\"\\""}
+            callback cb_InsertTag
+            xywh {20 20 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onKeypress
+            user_data {"onKeypress\\"\\""}
+            callback cb_InsertTag
+            xywh {20 20 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onKeydown
+            user_data {"onKeydown\\"\\""}
+            callback cb_InsertTag
+            xywh {20 20 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onKeyup
+            user_data {"onKeyup\\"\\""}
+            callback cb_InsertTag
+            xywh {20 20 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onSubmit
+            user_data {"onSubmit\\"\\""}
+            callback cb_InsertTag
+            xywh {20 20 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onReset
+            user_data {"onReset\\"\\""}
+            callback cb_InsertTag
+            xywh {30 30 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onSelect
+            user_data {"onSelect\\"\\""}
+            callback cb_InsertTag
+            xywh {30 30 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onChange
+            user_data {"onChange\\"\\""}
+            callback cb_InsertTag
+            xywh {30 30 100 20} labelsize 12
+          }
+        }
+        Fl_Button {} {
+          label if
+          user_data {"if() {}"}
+          callback cb_InsertTag
+          xywh {100 75 35 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label {&ifelse}
+          user_data {"if() {} else {}"}
+          callback cb_InsertTag
+          xywh {145 75 47 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label do
+          user_data {"do {} while();"}
+          callback cb_InsertTag
+          xywh {190 74 47 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label {&while}
+          user_data {"while() {}"}
+          callback cb_InsertTag
+          xywh {240 75 47 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label {f&or}
+          user_data {"for ( ; ; ) {}"}
+          callback cb_InsertTag
+          xywh {299 75 47 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label {for(i)}
+          user_data {"for (i=; i< ; i++ ) {}"}
+          callback cb_InsertTag
+          xywh {352 75 47 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label switch
+          user_data {"switch () {default:}"}
+          callback cb_InsertTag
+          xywh {412 75 47 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label function
+          user_data {"function () {return}"}
+          callback cb_InsertTag
+          xywh {464 75 61 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label script
+          user_data {"<script language=\\"JavaScript\\"> <!--        //-->  </script> <noscript> </noscript>"}
+          callback cb_InsertTag
+          xywh {533 75 51 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+      }
+      Fl_Group mnu_Tab_VBScript {
+        label VBScript open
+        xywh {0 73 1025 31} labelsize 12 hide
+      } {
+        Fl_Menu_Button {} {
+          label events open
+          image {../fltk_editor/toolbar/run.png} xywh {5 75 90 24} box FLAT_BOX down_box THIN_UP_BOX labelsize 10
+        } {
+          MenuItem {} {
+            label onLoad
+            user_data {"onLoad\\"\\""}
+            callback cb_InsertTag
+            xywh {10 10 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onUnload
+            user_data {"onUnload\\"\\""}
+            callback cb_InsertTag
+            xywh {10 10 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onClick
+            user_data {"onClick\\"\\""}
+            callback cb_InsertTag
+            xywh {10 10 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onDBLclick
+            user_data {"onDBLclick\\"\\""}
+            callback cb_InsertTag
+            xywh {20 20 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onMouseDown
+            user_data {"onMouseDown\\"\\""}
+            callback cb_InsertTag
+            xywh {20 20 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onMouseUp
+            user_data {"onMouseUp\\"\\""}
+            callback cb_InsertTag
+            xywh {20 20 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onMouseOver
+            user_data {"onMouseOver\\"\\""}
+            callback cb_InsertTag
+            xywh {20 20 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onMouseMove
+            user_data {"onMouseMove\\"\\""}
+            callback cb_InsertTag
+            xywh {20 20 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onMouseOut
+            user_data {"onMouseOut\\"\\""}
+            callback cb_InsertTag
+            xywh {20 20 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onFocus
+            user_data {"onFocus\\"\\""}
+            callback cb_InsertTag
+            xywh {30 30 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onBlur
+            user_data {"onBlur\\"\\""}
+            callback cb_InsertTag
+            xywh {30 30 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onKeypress
+            user_data {"onKeypress\\"\\""}
+            callback cb_InsertTag
+            xywh {30 30 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onKeydown
+            user_data {"onKeydown\\"\\""}
+            callback cb_InsertTag
+            xywh {30 30 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onKeyup
+            user_data {"onKeyup\\"\\""}
+            callback cb_InsertTag
+            xywh {30 30 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onSubmit
+            user_data {"onSubmit\\"\\""}
+            callback cb_InsertTag
+            xywh {30 30 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onReset
+            user_data {"onReset\\"\\""}
+            callback cb_InsertTag
+            xywh {40 40 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onSelect
+            user_data {"onSelect\\"\\""}
+            callback cb_InsertTag
+            xywh {40 40 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label onChange
+            user_data {"onChange\\"\\""}
+            callback cb_InsertTag
+            xywh {40 40 100 20} labelsize 12
+          }
+        }
+        Fl_Button {} {
+          label if
+          user_data {"IF        THEN        END IF"}
+          callback cb_InsertTag
+          xywh {110 75 35 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label {if-else}
+          user_data {"IF         THEN       ELSE        END IF"}
+          callback cb_InsertTag
+          xywh {155 75 50 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label {do-while}
+          user_data {"DO WHILE            LOOP"}
+          callback cb_InsertTag
+          xywh {216 75 59 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label {do-until}
+          user_data {"DO                    LOOP UNTIL"}
+          callback cb_InsertTag
+          xywh {280 75 59 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label for
+          user_data {"FOR i=   TO               NEXT"}
+          callback cb_InsertTag
+          xywh {351 75 38 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label {for-each}
+          user_data {"FOR EACH                 IN                 NEXT"}
+          callback cb_InsertTag
+          xywh {400 75 59 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label select
+          user_data {"SELECT Case                   CASE            CASE ELSE           END IF"}
+          callback cb_InsertTag
+          xywh {469 75 59 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label function
+          user_data {"FUNCTION ()  END FUNCTION"}
+          callback cb_InsertTag
+          xywh {528 75 61 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+        Fl_Button {} {
+          label script
+          user_data {"<script language=\\"VBScript\\" type=\\"text/vbscript\\">                <!--          //-->      </script>               <noscript></noscript>"}
+          callback cb_InsertTag
+          xywh {594 75 61 24} box FLAT_BOX down_box DOWN_BOX labelfont 4 labelsize 12
+        }
+      }
+      Fl_Group mnu_Tab_Colors {
+        label Colors open
+        xywh {0 73 1281 32} labelsize 12 hide
+      } {
+        Fl_Button {} {
+          label Color
+          tooltip {Select Color} xywh {2 75 52 24} color 214 labelsize 12
+        }
+        Fl_Wizard mnu_Color_Selector {
+          label { }
+          user_data mnu_Color_Selector
+          callback cb_ColorSelector_Clicked open
+          xywh {100 75 0 0}
+          class Fl_Color_Direct_Selector
+        } {}
+      }
+      Fl_Group mnu_Tab_Paramiter {
+        label Parameter open
+        xywh {0 73 1020 32} labelsize 12 hide
+      } {
+        Fl_Input txt_Parameter {
+          label {Target="" Parameter for Hyperlink}
+          tooltip {Hyperlink address} xywh {240 76 389 24} color 54 labelsize 12 textsize 12 textcolor 176
+        }
+      }
+    }
+    Fl_Group {} {open
+      xywh {0 0 1280 50} labelsize 12
+    } {
+      Fl_Menu_Bar Editor_Meny_File {open
+        xywh {0 0 1275 25} box FLAT_BOX down_box THIN_UP_BOX color 7 labelsize 12
+      } {
+        Submenu mnu_File {
+          label { &File}
+          xywh {10 10 100 40} labelsize 12
+        } {
+          MenuItem mnu_New {
+            label {&New}
+            callback {cb_File_New();}
+            xywh {15 15 100 40} shortcut 0x4006e labelsize 12
+          }
+          Submenu mnu_History {
+            label {&History} open
+            xywh {0 0 100 20} labelsize 12 divider
+          } {
+            MenuItem mnu_ClearHistory {
+              label {Clear History}
+              xywh {0 0 100 20} labelsize 12 deactivate
+            }
+          }
+          MenuItem mnu_Open {
+            label {&Open}
+            callback {cb_File_Open();}
+            xywh {25 25 100 40} shortcut 0x4006f labelsize 12
+          }
+          Submenu Sub_mnu_ShowFile {
+            label {&Show File} open
+            xywh {20 20 100 20} labelsize 12
+          } {}
+          MenuItem mnu_NextFile {
+            label {N&ext File}
+            callback {cb_TabNext();}
+            xywh {15 15 100 20} shortcut 0xcff09 labelsize 12
+          }
+          MenuItem mnu_LastFile {
+            label {&Previous File}
+            callback {cb_TabPrev();}
+            xywh {15 15 100 20} shortcut 0xdff09 labelsize 12
+          }
+          MenuItem mnu_Save {
+            label {&Save}
+            callback {cb_File_Save("");// this should be fixed .. you should send the name of the file which should be saved.}
+            xywh {40 60 100 40} shortcut 0x40073 labelsize 12
+          }
+          MenuItem mnu_SaveAs {
+            label {S&ave As}
+            callback {cb_File_SaveAs();}
+            xywh {40 50 100 40} shortcut 0xc0073 labelsize 12
+          }
+          MenuItem mnu_SaveAsLinux {
+            label {Save as Linux format}
+            xywh {15 15 100 20} labelsize 12
+          }
+          MenuItem mnu_SaveAll {
+            label {Save A&ll}
+            xywh {15 15 100 20} labelsize 12
+          }
+          MenuItem mnu_Close {
+            label {&Close}
+            callback {cb_File_Close();}
+            xywh {45 80 100 40} shortcut 0x4ffc1 labelsize 12
+          }
+          MenuItem mnu_Exit {
+            label {&Exit}
+            callback {exit(0);}
+            xywh {15 15 100 20} labelsize 12
+          }
+        }
+        Submenu mnu_Edit {
+          label { &Edit} open
+          xywh {25 25 100 40} labelsize 12
+        } {
+          MenuItem mnu_Undo {
+            label {&Undo}
+            xywh {30 30 100 40} shortcut 0x4007a labelsize 12
+          }
+          MenuItem mnu_Redo {
+            label {&Redo}
+            xywh {40 75 100 40} shortcut 0x40079 labelsize 12
+          }
+          MenuItem mnu_Cut {
+            label {C&ut}
+            xywh {35 35 100 40} shortcut 0x40078 labelsize 12
+          }
+          MenuItem mnu_Copy {
+            label {&Copy}
+            xywh {25 25 100 20} shortcut 0x40063 labelsize 12
+          }
+          MenuItem mnu_Paste {
+            label {&Paste}
+            xywh {25 25 100 20} shortcut 0x40076 labelsize 12
+          }
+          MenuItem mnu_Delete {
+            label {&Delete}
+            xywh {50 70 100 40} labelsize 12
+          }
+          MenuItem mnu_SelectAll {
+            label {Select All}
+            xywh {50 60 100 40} shortcut 0x40061 labelsize 12
+          }
+          MenuItem mnu_Tab {
+            label {&Tabe}
+            xywh {25 25 100 20} shortcut 0xff09 labelsize 12
+          }
+          MenuItem mnu_ReverseTab {
+            label {Reverse Tabe}
+            xywh {25 25 100 20} shortcut 0x1ff09 labelsize 12
+          }
+          MenuItem mnu_Find {
+            label {&Find}
+            xywh {55 90 100 40} shortcut 0x40066 labelsize 12
+          }
+          MenuItem mnu_FindNext {
+            label {&Find Next}
+            xywh {25 25 100 20} shortcut 0xffc0 labelsize 12
+          }
+          MenuItem mnu_Replace {
+            label {&Replace}
+            xywh {65 100 100 40} shortcut 0x40068 labelsize 12
+          }
+          MenuItem mnu_Goto {
+            label {&Goto}
+            xywh {75 110 100 40} shortcut 0x40067 labelsize 12
+          }
+        }
+        Submenu mnu_Insert {
+          label { &Insert}
+          xywh {40 40 100 40} labelsize 12
+        } {
+          MenuItem mnu_Hyperlink {
+            label {&Hyper Link}
+            xywh {45 45 100 40} labelsize 12
+          }
+          MenuItem mnu_Yourhomesite {
+            label {&Your Homesite}
+            xywh {55 90 100 40} labelsize 12
+          }
+          MenuItem mnu_EmailAdress {
+            label {&Email Adress}
+            xywh {50 50 100 40} labelsize 12
+          }
+          MenuItem mnu_YourEmail {
+            label {&Your Email Adress}
+            xywh {40 40 100 20} labelsize 12
+          }
+          MenuItem mnu_Anker {
+            label {&Anker}
+            xywh {40 40 100 20} labelsize 12
+          }
+          MenuItem mnu_HorisontalLine {
+            label {&Horisontal Line}
+            xywh {65 85 100 40} labelsize 12
+          }
+          MenuItem mnu_Picture {
+            label Picture
+            xywh {65 75 100 40} labelsize 12
+          }
+          MenuItem mnu_RGB {
+            label {&RGB}
+            xywh {40 40 100 20} labelsize 12
+          }
+          Submenu mnu_Date {
+            label Date open
+            xywh {10 10 100 20} labelsize 12
+          } {
+            MenuItem mnu_Automatic {
+              label Automatic
+              xywh {45 45 100 20} shortcut 0x1ff09 labelsize 12
+            }
+            MenuItem {mnu_2007-10-29} {
+              label {2007-10-29}
+              xywh {75 110 100 40} labelsize 12
+            }
+            MenuItem mnu_20071029 {
+              label {2007/10/29}
+              xywh {45 45 100 20} labelsize 12
+            }
+          }
+        }
+        Submenu mnu_Format {
+          label { Fo&rmat} open
+          xywh {45 45 100 40} labelsize 12
+        } {
+          Submenu mnu_Title {
+            label Title open
+            xywh {5 5 100 20} labelsize 12
+          } {
+            MenuItem mnu_H1 {
+              label H1
+              user_data {"<h1></h1>"}
+              xywh {55 55 100 40} shortcut 0x4ffbe labelsize 12
+            }
+            MenuItem mnu_H2 {
+              label H2
+              user_data {"<h2></h2>"}
+              xywh {65 100 100 40} shortcut 0x4ffbf labelsize 12
+            }
+            MenuItem mnu_H3 {
+              label H3
+              user_data {"<h3></h3>"}
+              xywh {60 60 100 40} shortcut 0x4ffc0 labelsize 12
+            }
+            MenuItem mnu_H4 {
+              label H4
+              user_data {"<h4></h4>"}
+              xywh {50 50 100 20} shortcut 0x4ffc1 labelsize 12
+            }
+            MenuItem mnu_H5 {
+              label H5
+              user_data {"<h5></h5>"}
+              xywh {50 50 100 20} shortcut 0x4ffc2 labelsize 12
+            }
+            MenuItem mnu_H6 {
+              label H6
+              user_data {"<h6></h6>"}
+              xywh {75 95 100 40} shortcut 0x4ffc3 labelsize 12
+            }
+          }
+          Submenu mnu_Text {
+            label Text
+            xywh {5 5 100 20} labelsize 12
+          } {
+            MenuItem mnu_acronym {
+              label acronym
+              user_data {"<acronym></acronym>"}
+              callback cb_InsertTag
+              xywh {5 5 100 20} labelsize 12
+            }
+            MenuItem mnu_Address {
+              label Address
+              user_data {" <address></address>"}
+              callback cb_InsertTag
+              xywh {5 5 100 20} shortcut 0xc0061 labelsize 12
+            }
+            MenuItem mnu_Em {
+              label Em
+              callback cb_InsertTag
+              xywh {5 5 100 20} shortcut 0xc0065 labelsize 12
+            }
+            MenuItem mnu_Blockquote {
+              label Blockquote
+              callback cb_InsertTag
+              xywh {5 5 100 20} shortcut 0xc0062 labelsize 12
+            }
+            MenuItem mnu_Sample {
+              label Sample
+              user_data {"<samp></samp>"}
+              callback cb_InsertTag
+              xywh {15 15 100 20} labelsize 12
+            }
+            MenuItem mnu_Code {
+              label Code
+              user_data {"<code></code>"}
+              callback cb_InsertTag
+              xywh {15 15 100 20} labelsize 12
+            }
+            MenuItem mnu_Definition {
+              label Definition
+              user_data {"<dfn></dfn>"}
+              callback cb_InsertTag
+              xywh {15 15 100 20} labelsize 12
+            }
+            MenuItem mnu_Big {
+              label Big
+              user_data {"<big></big>"}
+              callback cb_InsertTag
+              xywh {15 15 100 20} labelsize 12
+            }
+            MenuItem mnu_Strong {
+              label Strong
+              user_data {"<strong></strong>"}
+              callback cb_InsertTag
+              xywh {15 15 100 20} labelsize 12
+            }
+            MenuItem mnu_Keyboard {
+              label Keyboard
+              user_data {"<kbd></kbd>"}
+              callback cb_InsertTag
+              xywh {25 25 100 20} labelsize 12
+            }
+            MenuItem mnu_Small {
+              label Small
+              user_data {"<acronym></acronym>"}
+              callback cb_InsertTag
+              xywh {35 35 100 20} labelsize 12
+            }
+            MenuItem mnu_Listing {
+              label Listing
+              user_data {"<listing></listing>"}
+              callback cb_InsertTag
+              xywh {15 15 100 20} shortcut 0xc0061 labelsize 12
+            }
+            MenuItem mnu_Typewriter {
+              label Typewriter
+              user_data {" <tt></tt>"}
+              callback cb_InsertTag
+              xywh {15 15 100 20} shortcut 0xc0061 labelsize 12
+            }
+            MenuItem mnu_Comment {
+              label Comment
+              user_data {"<comment></comment>"}
+              callback cb_InsertTag
+              xywh {15 15 100 20} labelsize 12
+            }
+            MenuItem mnu_Preformatted {
+              label Preformatted
+              user_data {"<pre></pre>"}
+              callback cb_InsertTag
+              xywh {15 15 100 20} labelsize 12
+            }
+            MenuItem mnu_Variable {
+              label Variable
+              user_data {"<var></var>"}
+              callback cb_InsertTag
+              xywh {25 25 100 20} shortcut 0xc0061 labelsize 12
+            }
+            MenuItem mnu_Citation {
+              label Citation
+              user_data {"<cite></cite>"}
+              callback cb_InsertTag
+              xywh {15 15 100 20} shortcut 0xc007a labelsize 12
+            }
+            MenuItem mnu_CitationWith {
+              label {Citatation with URL}
+              user_data {"<q cite=\\"\\"></q>"}
+              callback cb_InsertTag
+              xywh {25 25 100 20} shortcut 0xc007a labelsize 12
+            }
+          }
+          MenuItem mnu_Paragraph {
+            label Paragraph
+            xywh {0 0 100 20}
+          }
+          MenuItem mnu_Paragraph {
+            label Paragraph selected
+            xywh {10 10 100 20}
+          }
+        }
+        Submenu mnu_Font {
+          label {Fon&t} open
+          xywh {5 5 100 20} labelsize 12
+        } {
+          Submenu mnu_FontSize {
+            label {Font Size} open
+            xywh {5 5 100 20} labelsize 12
+          } {
+            MenuItem mnu_PlusFour {
+              label {+4}
+              user_data {"<font size=\\"+4\\"></font>"}
+              callback cb_InsertTag
+              xywh {5 5 100 20} shortcut 0xcffc1 labelsize 12
+            }
+            MenuItem mnu_PlusThree {
+              label {+3}
+              user_data {"<font size=\\"+3\\"></font>"}
+              callback cb_InsertTag
+              xywh {15 15 100 20} shortcut 0xcffc0 labelsize 12
+            }
+            MenuItem mnu_PlusTwo {
+              label {+2}
+              user_data {"<font size=\\"+2\\"></font>"}
+              callback cb_InsertTag
+              xywh {25 25 100 20} shortcut 0xcffbf labelsize 12
+            }
+            MenuItem mnu_PlusOne {
+              label {+1}
+              user_data {"<font size=\\"+1\\"></font>"}
+              callback cb_InsertTag
+              xywh {35 35 100 20} shortcut 0xcffbe labelsize 12
+            }
+            MenuItem mnu_MinusOne {
+              label {-1}
+              user_data {"<font size=\\"-1\\"></font>"}
+              callback cb_InsertTag
+              xywh {45 45 100 20} shortcut 0xdffbe labelsize 12
+            }
+            MenuItem mnu_MinusTwo {
+              label {-2}
+              user_data {"<font size=\\"-2\\"></font>"}
+              callback cb_InsertTag
+              xywh {55 55 100 20} shortcut 0xdffbf labelsize 12 divider
+            }
+            MenuItem mnu_BaseFont {
+              label {Base Font}
+              user_data {"<basefont size==\\"3\\"></basefont>"}
+              callback cb_InsertTag
+              xywh {55 55 100 20} labelsize 12
+            }
+          }
+          Submenu mnu_FontFormat {
+            label {Font Format} open
+            xywh {0 0 100 20} labelsize 12
+          } {
+            MenuItem mnu_FontArial {
+              label {VERDANA, ARIAL, HELVETICA}
+              user_data {"<font face=\\"VERDANA,ARIAL,HELVETICA\\"></font>"}
+              callback cb_InsertTag
+              xywh {0 0 100 20} labelsize 12 divider
+            }
+            MenuItem mnu_FontCourier {
+              label COURIER
+              user_data {"<font face=\\"COURIER NEW\\"></font>"}
+              callback cb_InsertTag
+              xywh {0 0 100 20} labelsize 12
+            }
+            MenuItem mnu_FontMonospace {
+              label MONOSPACE
+              user_data {"<font face=\\"MONOSPACE\\"></font>"}
+              callback cb_InsertTag
+              xywh {10 10 100 20} labelsize 12 divider
+            }
+            MenuItem mnu_FontSelect {
+              label {Select Font}
+              callback cb_SelectFont
+              xywh {20 20 100 20} labelsize 12 divider
+            }
+          }
+          MenuItem mnu_FontColor {
+            label {Font Color}
+            xywh {5 5 100 20} labelsize 12 divider
+          }
+          MenuItem mnu_FontBold {
+            label Bold
+            xywh {15 15 100 20} shortcut 0x40062 labelfont 1 labelsize 12
+          }
+          MenuItem mnu_FontItalic {
+            label Italic
+            xywh {25 25 100 20} shortcut 0x40069 labelfont 2 labelsize 12
+          }
+          MenuItem mnu_FontUnderLine {
+            label {Under Line}
+            xywh {35 35 100 20} shortcut 0x40075 labelsize 12
+          }
+          MenuItem mnu_SuperScript {
+            label Superscript
+            xywh {45 45 100 20} labelsize 12
+          }
+          MenuItem mnu_FontSubScript {
+            label Subscript
+            xywh {55 55 100 20} labelsize 12 divider
+          }
+          MenuItem mnu_FontStrick {
+            label {Font Strick}
+            xywh {65 65 100 20} labelsize 12 divider
+          }
+          MenuItem mnu_FontScrollingText {
+            label {Scrolling text}
+            xywh {75 75 100 20} labelsize 12
+          }
+        }
+        Submenu {} {
+          label Tools open
+          xywh {10 10 100 20} labelsize 12
+        } {
+          MenuItem mnu_ToolsDebuger {
+            label Debuger
+            xywh {10 10 100 20} shortcut 0xffbe labelsize 12
+          }
+          MenuItem mnu_ToolsHTMLConstructor {
+            label {HTML Constructor}
+            xywh {20 20 100 20} labelsize 12
+          }
+          MenuItem mnu_ToolsTableAssistant {
+            label {Table Assistant}
+            callback {cb_Table_Assistant();}
+            xywh {30 30 100 20} labelsize 12
+          }
+        }
+        Submenu {} {
+          label {&Help} open
+          xywh {5 5 100 20} labelsize 12
+        } {
+          MenuItem {} {
+            label Help
+            xywh {5 5 100 20} shortcut 0xffbe labelsize 12
+          }
+          MenuItem {} {
+            label item
+            xywh {15 15 100 20} labelsize 12
+          }
+          MenuItem {} {
+            label About
+            callback {Getabout();}
+            xywh {25 25 100 20} labelsize 12
+          }
+        }
+      }
+    }
+    Fl_Tabs tab_FileManager {
+      user_data tab_FileManager
+      callback cb_tab_FileManager open
+      xywh {0 105 220 25}
+    } {
+      Fl_Group tab_Editor_View {
+        label Editor open
+        xywh {0 125 215 5} labelsize 12
+      } {}
+      Fl_Group tab_Picture_View {
+        label Picture open
+        xywh {5 125 215 5} labelsize 12 hide
+      } {}
+      Fl_Group tab_Browser_View {
+        label Browser open
+        xywh {0 125 220 5} labelsize 12 hide
+      } {}
+    }
+    Fl_Tabs txt_Tab_Edit {open
+      xywh {230 105 1050 860} selection_color 238
+    } {
+      Fl_Wizard txtEditorTemplate {
+        label {Untitiled 0} open
+        xywh {230 125 1050 840} labelsize 9 resizable
+        class Fl_New_File
+      } {}
+    }
+    Fl_Menu_Bar {} {open
+      xywh {0 26 1272 25}
+    } {}
+    Fl_Group {} {open
+      xywh {5 26 635 25}
+    } {
+      Fl_Button btn_File_New {
+        callback {cb_File_New();}
+        tooltip New image {../fltk_editor/toolbar/button.new.gif} xywh {5 26 25 24} box THIN_UP_BOX shortcut 0x4006e
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_File_Open {
+        callback {cb_File_Open();}
+        tooltip Open image {../fltk_editor/toolbar/fileopen.xpm} xywh {30 26 25 25} box THIN_UP_BOX shortcut 0x4006f
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_File_Close {
+        callback {cb_File_Close();}
+        tooltip Close image {../fltk_editor/toolbar/fileclose.png} xywh {55 26 25 25} box THIN_UP_BOX down_box THIN_DOWN_BOX shortcut 0x4ffc1 align 16
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_File_Save {
+        callback {cb_File_Save("");// this should be fixed .. you should send the name of the file which should be saved.}
+        tooltip Save image {../fltk_editor/toolbar/filesave.xpm} xywh {80 26 25 25} box THIN_UP_BOX shortcut 0x40073
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_File_SaveAll {
+        callback {cb_File_SaveAll();}
+        tooltip {Save All} image {../fltk_editor/toolbar/filesaveAll.xpm} xywh {105 26 25 25} box THIN_UP_BOX
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_File_Backup {
+        callback {cb_File_Backup();}
+        tooltip Backup image {toolbar/zip.gif} xywh {130 26 25 25} box THIN_UP_BOX
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_Edit_Cut {
+        callback {cb_Edit_Cut();}
+        tooltip Cut image {../fltk_editor/toolbar/cut.xpm} xywh {159 26 25 25} box THIN_UP_BOX shortcut 0x40078
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_Edit_Copy {
+        callback {cb_Edit_Copy();}
+        tooltip Copy image {../fltk_editor/toolbar/copy.xpm} xywh {184 26 25 25} box THIN_UP_BOX shortcut 0x40063
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_Edit_Paste {
+        callback {cb_Edit_Paste();}
+        tooltip Paste image {../fltk_editor/toolbar/button.pastetext.xpm} xywh {209 26 25 25} box THIN_UP_BOX shortcut 0x40076
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_Edit_Undo {
+        callback {cb_Edit_Undo();}
+        tooltip Undo image {toolbar/button.undo.xpm} xywh {237 26 25 25} box THIN_UP_BOX shortcut 0x4007a
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_Edit_Redo {
+        callback {cb_Edit_Redo();}
+        tooltip Redo image {../fltk_editor/toolbar/button.redo.xpm} xywh {262 26 25 25} box THIN_UP_BOX shortcut 0x40079
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_Insert_Hyperlink {
+        callback {cb_Insert_Hyperlink();}
+        tooltip Hyperlink image {../fltk_editor/toolbar/www.xpm} xywh {292 26 25 25} box THIN_UP_BOX
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_Insert_EmailAddress {
+        callback {cb_Insert_EmailAddress();}
+        tooltip {Email adress} image {../fltk_editor/toolbar/mail_generic.png} xywh {317 26 25 25} box THIN_UP_BOX
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_Insert_Anchor {
+        callback {cb_Insert_Anchor();}
+        tooltip Link image {../fltk_editor/toolbar/button.anchor.xpm} xywh {342 26 25 25} box THIN_UP_BOX
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_Insert_HLine {
+        label {---}
+        callback {cb_Insert_HLine();}
+        tooltip {Horizental line} xywh {367 26 25 25} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelsize 18 align 17
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_Insert_Picture {
+        callback {cb_Insert_Picture();}
+        tooltip {Insert image} image {toolbar/button.image.xpm} xywh {392 26 25 25} box THIN_UP_BOX
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_Insert_HomeAdress {
+        callback {cb_Insert_HomeAdress();}
+        tooltip {Home Page(Yours)} image {../fltk_editor/toolbar/gohome.png} xywh {421 26 25 25} box THIN_UP_BOX
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_Insert_EmailCust {
+        callback {cb_Insert_EmailCust();}
+        tooltip {Email adress (yours)} image {../fltk_editor/toolbar/button.mail.xpm} xywh {447 26 25 25} box THIN_UP_BOX
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Button btn_Insert_Favorite {
+        callback {cb_Insert_Favorite();}
+        tooltip {Home page from your favorite url} image {../fltk_editor/toolbar/bookmark_folder.png} xywh {472 26 25 25} box THIN_UP_BOX
+        code0 {o->clear_visible_focus();}
+      }
+      Fl_Menu_Button mnu_File_Preview {open
+        tooltip Preview image {../fltk_editor/toolbar/button.preview.xpm} xywh {507 26 57 23} box THIN_UP_BOX down_box THIN_UP_BOX align 148
+        code0 {o->clear_visible_focus();}
+      } {
+        MenuItem btn_File_Preview {
+          label Preview
+          callback {cb_File_Preview();}
+          xywh {0 0 158 20} shortcut 0xffc6 labelsize 12
+        }
+        MenuItem btn_File_Prev_IExplorer {
+          label {Preview with Internet Explorer}
+          callback {cb_File_Pr_IExplorer();}
+          xywh {10 10 158 20} shortcut 0x1ffc6 labelsize 12
+        }
+      }
+    }
+    Fl_Group gr_btn_textSize {
+      xywh {218 102 15 866}
+    } {
+      Fl_Button btn_HideShow {
+        label {@<}
+        callback {Fl_Tabs* tb= (Fl_Tabs*)(tab_FileManager);
+
+
+if (btn_HideShow->label()=="@<")
+ {
+// which one should be resized? 
+    if (((tb->value())->label())=="Editor")
+       {
+        txt_Tab_Edit->resize(11,105,1021+250,860);
+        txtEditorTemplate->resize(11,125,1021+250,840);
+        gr_btn_textSize->resize(0,102,12,866);
+        btn_HideShow->resize(1,325,10,155);
+        btn_HideShow->label("@>");
+        tab_FileManager->hide();
+        fl_File_View->hide();
+        direcotryBrowser->hide();
+        }
+     else 
+         if (((tb->value())->label())=="Picture")
+           {     
+            gr_View_Picture->resize(11,105,1021+250,860);
+            previewBox->resize(11,133,1021+250,840);
+            gr_btn_textSize->resize(0,102,12,866);
+            btn_HideShow->resize(1,325,10,155);
+            btn_HideShow->label("@>");
+            tab_FileManager->hide();
+            fl_File_View->hide();
+            direcotryBrowser->hide();
+           }
+         else
+            if (((tb->value())->label())=="Browser")
+              {
+                gr_View_Browser->resize(11,105,1021+250,860);     
+            	hv_Browser->resize(11,125,1021+250,840);
+            	gr_btn_textSize->resize(0,102,12,866);
+            	btn_HideShow->resize(1,325,10,155);
+            	btn_HideShow->label("@>");
+            	tab_FileManager->hide();
+            	fl_File_View->hide();
+            	direcotryBrowser->hide();
+              }
+
+         
+ }
+else
+ {
+ // which one should be resized? 
+    if (((tb->value())->label())=="Editor")
+       {
+          txt_Tab_Edit->resize(230,105,1050,860);
+          txtEditorTemplate->resize(230,125,1050,840);
+          gr_btn_textSize->resize(218,102,12,866);
+          btn_HideShow->label("@<");
+          btn_HideShow->resize(220,325,10,155);
+          tab_FileManager->show();
+          fl_File_View->show();
+          direcotryBrowser->show();
+        }
+     else 
+         if (((tb->value())->label())=="Picture")
+           {
+             gr_View_Picture->resize(234,105,1043,857);
+             previewBox->resize(235,133,1040,830);
+             gr_btn_textSize->resize(218,102,12,866);
+             btn_HideShow->label("@<");
+             btn_HideShow->resize(220,325,10,155);
+             tab_FileManager->show();
+             fl_File_View->show();
+             direcotryBrowser->show();
+               
+           }
+         else
+            if (((tb->value())->label())=="Browser")
+              {
+                gr_View_Browser->resize(234,105,1043,857);
+                hv_Browser->resize(235,153,1040,807);
+                gr_btn_textSize->resize(218,102,12,866);
+                btn_HideShow->label("@<");
+                btn_HideShow->resize(220,325,10,155);
+                tab_FileManager->show();
+                fl_File_View->show();
+                direcotryBrowser->show();
+
+              }
+
+    
+ }
+
+txt_Tab_Edit->redraw();
+gr_btn_textSize->redraw();
+btn_HideShow->redraw();
+fl_File_View->redraw();
+direcotryBrowser->redraw();}
+        xywh {221 335 10 155}
+        code0 {o->clear_visible_focus();}
+      }
+    }
+    Fl_Group gr_View_Picture {
+      label 2 open
+      xywh {234 105 1037 858} box FLAT_BOX selection_color 149 hide
+    } {
+      Fl_Wizard previewBox {
+        label {?}
+        user_data previewBox
+        callback cb_PreviewBoxClicked open
+        xywh {235 133 1037 830}
+        class Fl_Preview_Image
+      } {}
+      Fl_Output lbClickedColor {
+        label {?}
+        xywh {630 105 141 25}
+      }
+      Fl_Button btnCopyColorCode {
+        user_data lbClickedColor
+        callback cb_Copy_Color_Code
+        image {ICONS/button.copy.xpm} xywh {772 105 25 25}
+      }
+    }
+    Fl_Group gr_View_Browser {
+      xywh {234 105 1038 857} box DOWN_BOX selection_color 172 labelsize 12 resizable
+    } {
+      Fl_Help_View hv_Browser {
+        xywh {236 153 1034 591} box FLAT_BOX selection_color 133 resizable
+      }
+      Fl_Button {} {
+        label {@<-}
+        xywh {302 107 25 25}
+      }
+      Fl_Button {} {
+        label {@->}
+        xywh {328 107 25 25}
+      }
+      Fl_Button {} {
+        label x
+        xywh {353 107 25 25} color 1
+      }
+      Fl_Button {} {
+        label update
+        xywh {378 107 25 25}
+      }
+      Fl_Button {} {
+        label Home
+        xywh {403 107 25 25}
+      }
+    }
+    Fl_File_Browser fl_File_View {
+      callback {cb_ShowPicturePreview();}
+      xywh {0 410 220 329}
+      code1 {fl_File_View->type(FL_HOLD_BROWSER);}
+    }
+    Fl_Wizard direcotryBrowser {
+      label { }
+      xywh {0 130 219 278} box PLASTIC_DOWN_BOX color 7 labelsize 12
+      class GetDir
+    } {}
+  }
+  code {tab_FileManager->do_callback();// call showing the first tab} {}
+} 
+
+Function {Getabout()} {return_type void
+} {
+  Fl_Window frmAbout {
+    label {FLTK Editor - About} open
+    xywh {4 385 472 221} type Double hide modal
+  } {
+    Fl_Button {} {
+      label OK
+      callback {frmAbout->hide();}
+      xywh {400 185 60 25} box THIN_UP_BOX down_box THIN_DOWN_BOX labeltype EMBOSSED_LABEL
+    }
+    Fl_Box {} {
+      label {FLTK Editor    Made by                 Mariwan Jalal}
+      xywh {10 15 373 175} box PLASTIC_UP_FRAME labeltype ENGRAVED_LABEL labelfont 9 labelsize 43 align 128
+    }
+  }
+  code {frmAbout->show();} {}
+} 
+
+Function {cb_File_Open()} {open return_type void
+} {
+  code {// Open a file 
+  char filename[256] = "";
+  char *newfile = fl_file_chooser("HTML Files (*.html)\\tImage Files (*.{bmp,gif,jpg,png})", "*.htm*",  filename);
+  if (newfile != NULL){
+   strcpy(filename,newfile); 
+     load_file(filename);
+}} {}
+} 
+
+Function {cb_File_New()} {open return_type void
+} {
+  code {// New Tab widget whould be made when you click New button.
+Fl_New_File *Prev =(Fl_New_File*)txt_Tab_Edit->value();  // get active tab
+if(Prev)
+{
+  while (Prev->pNext)
+    Prev=Prev->pNext; // get the last one 
+}
+
+txt_Tab_Edit->begin();
+char buf[30];
+snprintf(buf, sizeof(Fl_New_File::counter)+10 ,"Untitiled %d",Fl_New_File::counter);
+Fl_New_File *st=new Fl_New_File(230,125,1050,840,"");
+
+st->pPrev=Prev; // make the link
+if(Prev)
+  Prev->pNext=st; // make the link
+
+st->NotSaved=1; // Not saved
+st->copy_label(buf);
+strcpy(st->fileName,buf);
+Fl_New_File::counter++;
+txt_Tab_Edit->end();
+txt_Tab_Edit->value(st);
+txt_Tab_Edit->redraw();
+return;} {}
+} 
+
+Function {check_save(void)} {open return_type int
+} {
+  code {// check if it need to be saved
+
+Fl_New_File* activeTab=(Fl_New_File*)txt_Tab_Edit->value();
+   if ((!activeTab->changed)&&(!activeTab->NotSaved))
+         return 1;
+  int r = fl_choice("The current file has not been saved.\\n"
+                    "Would you like to save it now?",
+                    "Cancel", "Save", "Don't Save");
+  if (r==0) 
+      return -1; // do nothing  cancel 
+  if (r == 1)
+ {
+    cb_File_Save(activeTab->fileName); // Save the file...
+    return !activeTab->changed;
+ }
+  return (r == 2) ? 1 : 0;} {}
+} 
+
+Function {cb_File_Close()} {open return_type void
+} {
+  code {//Close file ... Before that we should check if it is saved
+Fl_New_File* activeTab=(Fl_New_File*)txt_Tab_Edit->value();
+int CheckSave=check_save();
+    if (CheckSave==0)
+  {
+	cb_File_Save(activeTab->fileName);
+  }
+  if (CheckSave==-1)
+     return; // don't close the file .. 
+     
+     activeTab->hide();
+//     activeTab->t->remove_modify_callback(changed_cb,activeTab);
+     if (!(activeTab->pNext)) // if there is next give focus to it or to the previous.
+         txt_Tab_Edit->value(activeTab->pPrev);
+       else
+         txt_Tab_Edit->value(activeTab->pNext);
+      if(activeTab)
+     {
+         if (activeTab->pNext==0) // it was the last item
+           {  if(activeTab->pPrev)
+               ((activeTab->pPrev)->pNext)=0;
+           }
+         else
+           if (activeTab->pPrev) 
+               activeTab->pPrev->pNext=activeTab->pNext;// connect the prev to the next and neglect this 
+
+        activeTab->clear();
+        txt_Tab_Edit->remove(activeTab);
+        delete (activeTab);
+        Fl_New_File::counter--;
+    }
+
+     txt_Tab_Edit->damage();
+  if (Fl_New_File::counter == 0)
+     cb_File_New();
+return;} {}
+} 
+
+Function {cb_File_Save(char* newfile)} {open return_type void
+} {
+  code {Fl_New_File* st=(Fl_New_File *)txt_Tab_Edit->value();     
+if ((st->NotSaved))  // needs save as
+{
+    cb_File_SaveAs();
+}
+else
+{
+  if (st->t->savefile(st->fileName)) // this will save the file
+    fl_alert("Error writing to file \\'%s\\':\\n%s.", newfile, strerror(errno));
+  else
+  st->changed = 0;
+  st->NotSaved=0;
+  st->t->call_modify_callbacks();
+}} {}
+} 
+
+Function {cb_File_SaveAll()} {open return_type void
+} {} 
+
+Function {cb_File_Backup()} {open return_type void
+} {} 
+
+Function {cb_Edit_Cut()} {open return_type void
+} {} 
+
+Function {cb_Edit_Paste()} {open return_type void
+} {} 
+
+Function {cb_Edit_Undo()} {open return_type void
+} {} 
+
+Function {cb_Edit_Redo()} {open return_type void
+} {} 
+
+Function {cb_Insert_Hyperlink()} {open return_type void
+} {} 
+
+Function {cb_Insert_EmailAddress()} {open return_type void
+} {} 
+
+Function {cb_Insert_Anchor()} {open return_type void
+} {} 
+
+Function {cb_Insert_HLine()} {open return_type void
+} {} 
+
+Function {cb_Insert_Picture()} {open return_type void
+} {} 
+
+Function {cb_Insert_HomeAdress()} {open return_type void
+} {} 
+
+Function {cb_Insert_EmailCust()} {open return_type void
+} {} 
+
+Function {cb_Insert_Favorite()} {open return_type void
+} {} 
+
+Function {cb_File_Pr_IExplorer()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Paragraph()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Align_Left()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Align_Center()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Align_Justify()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Indent()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_Bold()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_Italic()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_Underline()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_Superscript()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_Subscript()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_PRE()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_H1()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_H2()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_H3()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_H4()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_H5()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_Plus4()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_Plus3()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_Plus2()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_Plus1()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_Minus1()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_FontStyle()} {open return_type void
+} {} 
+
+Function {cb_mnuText_Format_Break()} {open return_type void
+} {} 
+
+Function {cb_Table_Assistant()} {open return_type void
+} {
+  Fl_Window frm_Table_Assistant {
+    label {Table Assistant}
+    tooltip {Table Assistant Form} xywh {17 30 557 296} type Double hide modal
+  } {
+    Fl_Button {} {
+      label {Insert Table}
+      callback {// Callbak ama dabet bigorit u ziatir shit binusit
+frm_Table_Assistant->hide();}
+      xywh {21 260 130 25}
+    }
+    Fl_Button {} {
+      label {Clear Table}
+      xywh {154 260 136 25}
+    }
+    Fl_Tile {} {open
+      xywh {0 0 535 254}
+    } {
+      Fl_Group {} {open
+        xywh {0 0 85 250} align 84
+      } {
+        Fl_Button {} {
+          xywh {0 0 85 15} align 80
+        }
+        Fl_Button {} {
+          label 01
+          xywh {0 15 85 15} align 80
+        }
+        Fl_Button {} {
+          label 02
+          xywh {0 30 85 15} align 80
+        }
+        Fl_Button {} {
+          label 03
+          xywh {0 45 85 15} align 80
+        }
+        Fl_Button {} {
+          label 04
+          xywh {0 60 85 15} align 80
+        }
+        Fl_Button {} {
+          label 05
+          xywh {0 75 85 15} align 80
+        }
+        Fl_Button {} {
+          label 07
+          xywh {0 105 85 15} align 80
+        }
+        Fl_Button {} {
+          label 06
+          xywh {0 90 85 15} align 80
+        }
+      }
+      Fl_Group {} {open
+        xywh {83 0 99 250} align 84
+      } {
+        Fl_Button {} {
+          label A
+          xywh {84 0 100 15} align 80
+        }
+        Fl_Input {} {
+          xywh {84 15 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {84 30 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {84 45 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {84 60 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {84 75 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {84 90 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {84 105 100 15} box UP_BOX labelsize 10 align 84
+        }
+      }
+      Fl_Group {} {open
+        xywh {182 0 100 250} align 84
+      } {
+        Fl_Button {} {
+          label B
+          xywh {182 0 100 15}
+        }
+        Fl_Input {} {
+          xywh {183 15 99 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {183 30 99 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {183 45 99 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {183 60 99 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {183 75 99 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {183 90 99 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {183 105 99 15} box UP_BOX labelsize 10 align 84
+        }
+      }
+      Fl_Group {} {open
+        xywh {380 0 100 250} align 84
+      } {
+        Fl_Button {} {
+          label D
+          xywh {380 0 100 15} align 80
+        }
+        Fl_Input {} {
+          xywh {380 15 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {380 30 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {380 45 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {380 60 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {380 75 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {380 90 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {380 105 100 15} box UP_BOX labelsize 10 align 84
+        }
+      }
+      Fl_Group {} {open
+        xywh {281 0 100 250} align 84
+      } {
+        Fl_Button {} {
+          label C
+          xywh {281 0 100 15} align 80
+        }
+        Fl_Input {} {
+          xywh {281 15 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {281 30 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {281 45 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {281 60 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {281 75 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {281 90 100 15} box UP_BOX labelsize 10 align 84
+        }
+        Fl_Input {} {
+          xywh {281 105 100 15} box UP_BOX labelsize 10 align 84
+        }
+      }
+    }
+    Fl_Button {} {
+      label Cancel
+      callback {frm_Table_Assistant->hide();}
+      xywh {475 260 80 25}
+    }
+    Fl_Value_Input frm_Table_Row {
+      label Row
+      tooltip {Row number} xywh {325 260 35 25} minimum 1 maximum 25 step 1 value 2
+    }
+    Fl_Repeat_Button {} {
+      label {@2<}
+      callback {if(!(( frm_Table_Row->value())>=25))
+frm_Table_Row->value(frm_Table_Row->value()+1);}
+      xywh {359 261 14 12} labelsize 7
+    }
+    Fl_Repeat_Button {} {
+      label {@2>}
+      callback {if(!(( frm_Table_Row->value())<=1))
+frm_Table_Row->value(frm_Table_Row->value()-1);}
+      xywh {359 272 14 12} labelsize 7
+    }
+    Fl_Value_Input frm_Table_Column {
+      label {   Column}
+      tooltip {Column number} xywh {373 260 33 25} align 8 minimum 1 maximum 25 step 1 value 2
+    }
+    Fl_Repeat_Button {} {
+      label {@2>}
+      callback {if(!(( frm_Table_Column->value())<=1))
+frm_Table_Column->value(frm_Table_Column->value()-1);}
+      xywh {405 272 14 12} labelsize 7
+    }
+    Fl_Repeat_Button {} {
+      label {@2<}
+      callback {if(!(( frm_Table_Column->value())>=25))
+frm_Table_Column->value(frm_Table_Column->value()+1);}
+      xywh {405 261 14 12} labelsize 7
+    }
+  }
+  code {frm_Table_Assistant->show();} {}
+} 
+
+Function {cb_mnuText_Align_Right()} {open return_type void
+} {} 
+
+Function {cb_Edit_Copy()} {open return_type void
+} {} 
+
+Function {cb_File_Preview()} {open return_type void
+} {} 
+
+Function {InsertTagWithAText(const char* TagOrigional, const char* GetSymbol, const char* TextInTag)} {open return_type {char*}
+} {
+  code {//Insert Tag After A char
+ const char* pToTagOrigional=TagOrigional;
+ int lengthOfTheTag=strlen(TagOrigional)+1;
+ char *buf=new char[lengthOfTheTag+strlen(TextInTag)+1];
+  for (int i=1;i<lengthOfTheTag;i++)
+  {
+     if(*(pToTagOrigional)==*GetSymbol)
+     {
+     pToTagOrigional++;
+     i++;
+      strncpy (buf,TagOrigional,i);
+      strcat(buf,TextInTag);
+      strcat(buf,pToTagOrigional);
+     return buf;
+     }
+    pToTagOrigional++;
+     
+  }
+ return "";} {}
+} 
+
+Function {changed_cb(void*, void* ChangedFile)} {open return_type void
+} {
+  code {//Function to show "changed" on the title bar ... when the file is shown and not saved....
+Fl_New_File* ChangeChanged=(Fl_New_File* )(ChangedFile);
+ChangeChanged->changed=1;} {}
+} 
+
+Function {Style_Color_determine(int        pos,		// I - Position of update
+             int        nInserted,	// I - Number of inserted chars
+	     int        nDeleted,	// I - Number of deleted chars
+             int        /*nRestyled*/,	// I - Number of restyled chars
+	     const char * /*deletedText*/,// I - Text that was deleted
+             void       *cbArg)} {open return_type void
+} {
+  code {//Style function .. this should be implimented... later} {}
+} 
+
+Function {cb_File_SaveAs(void)} {open return_type int
+} {
+  code {/// Save As function
+ char *newfile;
+Fl_New_File* st=(Fl_New_File *)txt_Tab_Edit->value();   
+
+  newfile = fl_file_chooser("Save File As?", "*", st->fileName);
+  if (newfile != NULL) 
+    {
+       strcpy(st->fileName, newfile);
+       if (st->t->savefile(st->fileName)) // this will save the file
+        {
+         fl_alert("Error writing to file \\'%s\\':\\n%s.", newfile, strerror(errno));
+        }
+      else
+        {
+
+	   char justFileName[30];
+	   char*scancp=newfile;
+	   int scanp= strlen(newfile)-1;
+	   char OLDjustFileName[30];
+	   snprintf(OLDjustFileName,1, "%c", '\\0');
+	   snprintf(justFileName,1, "%c", '\\0');
+	   char tempChar;
+	   while (((int)(scancp[scanp])!=0x2f)&&((int)(scancp[scanp])!=0x5c))  // 0x2f= /
+      		{
+       		  tempChar=scancp[scanp];
+       		  strcpy(OLDjustFileName,justFileName);
+       		  if (!(strlen(OLDjustFileName)==0))
+       		 {
+          	  snprintf(justFileName,strlen(OLDjustFileName)+2, "%c%s", tempChar,OLDjustFileName);
+	         }
+       		 else
+       		 {
+         	  snprintf(justFileName,2, "%c", tempChar);
+       		  }
+       		scanp=scanp-1;
+                }
+          char buf[30];
+          snprintf(buf,30,"%s",justFileName);
+          st->changed = 0;
+          st->NotSaved=0;
+          st->copy_label(justFileName);
+          st->t->call_modify_callbacks();
+          return 0;
+        }
+     }
+   else
+   return 1;} {}
+} 
+
+Function {cb_Select_Font(Fl_Widget*, void*)} {open return_type {static void}
+} {
+  code {// This function should be written and it return the font type size style.} {}
+} 
+
+Function {cb_ColorSelector_Clicked(Fl_Widget*, void* wid)} {open return_type void
+} {
+  code {Fl_New_File* st=(Fl_New_File *)txt_Tab_Edit->value();
+Fl_Color_Direct_Selector *getWid=(Fl_Color_Direct_Selector*)wid;
+char Buff[7];
+snprintf(Buff,7 ,"\#%X",getWid->GetColorClicked());
+cb_InsertTag(st,Buff);} {}
+} 
+
+Function {cb_Copy_Color_Code(Fl_Widget*, void* cpCode)} {open return_type void
+} {
+  code {//this function should copy the code to the clipboard
+Fl_Output *outCodeMon=(Fl_Output*)cpCode;
+Fl::copy(outCodeMon->value(), 7, 1); // copy the value to the clipboard} {}
+} 
+
+Function {cb_SelectFont(Fl_Widget* , void* frmT)} {open return_type void
+} {
+  code {//Font browser show callback 
+// In this function we will show the font browser 
+Fl_Font_Browser *fb= new Fl_Font_Browser();
+fb->callback((Fl_Callback*)cb_FontBrowser, (void*)(fb));   
+fb->show();} {}
+} 
+
+Function {cb_FontBrowser(Fl_Widget*,  void* frm_FontBrowser)} {open return_type void
+} {
+  code {// Get the font browsers value and insert it to the Text Editor (Active tab) or Activate the tab
+
+Fl_Font_Browser *fb=(Fl_Font_Browser*)frm_FontBrowser;
+
+char buf[255]; // Max font selection length estimated as 255!
+char buf2[255];
+
+
+// font face = fb->lst_Font->text(fb->lst_Font->value());
+//font size = fb->pickedsize;
+//font color = fb->box_Example->GetFontColor();
+sprintf (buf,"%s%d\\"  %s %s\\"  %s %X  %s ", "<font  size=\\"",fb->pickedsize ," face=\\"", fb->lst_Font->text(fb->lst_Font->value()), "color=\\"", fb->box_Example->GetFontColor(), "\\">  </font>");
+
+// font style=  fb->GetFontStyle()
+
+
+if (fb->box_Example->GetFontStyle()>0)
+  switch (fb->box_Example->GetFontStyle())
+   {
+     case 1: // Bold selected 
+           {
+             sprintf(buf2,"%s",InsertTagWithAText("<b>  </b>",">",buf));
+             sprintf(buf,"%s",buf2);
+            break;
+                      
+           
+           }
+  
+     case 2: 
+           {
+           
+            sprintf(buf2,"%s",InsertTagWithAText("<i>  </i>",">",buf));
+            sprintf(buf,"%s",buf2);
+            break;
+
+           
+           }
+  
+     case 3: 
+           {
+            sprintf(buf2,"%s",InsertTagWithAText("<b>  </b>",">",buf));
+            sprintf(buf,"%s",InsertTagWithAText("<i>  </i>",">",buf2));
+            break;
+           
+           
+           }
+  
+    default:
+      break;
+  
+  
+   }
+  
+// font options :
+// font Strickthrough=fb->GetFontStrickTrhough()
+// font underline = fb->GetFontUnderline()
+
+    if(fb->box_Example->GetFontStrickTrhough()!=0)
+      {
+       sprintf(buf2,"%s",InsertTagWithAText("<s>  </s>",">",buf));
+       sprintf(buf,"%s",buf2);
+       ;
+       }
+    if (fb->box_Example->GetFontUnderline()!=0)
+      {
+       sprintf(buf2,"%s",InsertTagWithAText("<u>  </u>",">",buf));                                                   
+       sprintf(buf,"%s",buf2);
+       }
+
+cb_InsertTag(fb,buf);
+fb->hide();} {}
+} 
+
+Function {cb_TabNext()} {open return_type void
+} {
+  code {//This should do the next function for a tab 
+  int			num_kids;
+  Fl_Widget	* const *kids;
+
+  if ((num_kids = txt_Tab_Edit->children()) == 0)
+    return;
+
+  for (kids = txt_Tab_Edit->array(); num_kids > 0; kids ++, num_kids --)
+  {
+    if ((*kids)->visible())
+      break;
+  }
+
+  if (num_kids > 1)
+    txt_Tab_Edit->value(kids[1]);} {}
+} 
+
+Function {cb_TabPrev()} {open return_type void
+} {
+  code {//This should do the previous function for a tab 
+ int			num_kids;
+  Fl_Widget	* const *kids;
+
+
+  if ((num_kids = txt_Tab_Edit->children()) == 0)
+    return;
+
+  for (kids = txt_Tab_Edit->array(); num_kids > 0; kids ++, num_kids --)
+    if ((*kids)->visible())
+      break;
+
+  if (num_kids > 0 && num_kids < txt_Tab_Edit->children())
+    txt_Tab_Edit->value(kids[-1]);} {}
+} 
